@@ -37,6 +37,17 @@ def lambda_handler(event, context):
         # Generar código Mermaid directamente desde el parser
         obj = load(code)
         validate(obj)
+
+        # Mapear los valores cortos del frontend a los nombres esperados por el parser
+        diagram_type_map = {
+            'flowchart': 'flowchart',
+            'sequence': 'sequenceDiagram',
+            'class': 'classDiagram',
+            'state': 'stateDiagram',
+            'er': 'erDiagram',
+            # Otros tipos pueden agregarse aquí si se implementan
+        }
+        diagram_type = diagram_type_map.get(diagram_type, 'flowchart')
         mermaid_code = to_ir(obj, diagram_type)
 
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'diagram': mermaid_code})}

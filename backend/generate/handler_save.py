@@ -7,8 +7,6 @@ from datetime import datetime
 import boto3
 
 from parser_json import load, validate, to_ir
-from renderer import ir_to_mermaid
-from auth_utils import validate_token
 
 # Configuración AWS
 dynamodb = boto3.resource('dynamodb')
@@ -29,6 +27,7 @@ def lambda_handler(event, context):
     dtype = body.get('type', '').lower()
     fmt = body.get('format', 'svg')
     token = body.get('token', '')
+    diagram_type = body.get('diagram', '').lower()
 
     try:
         # Validar token y obtener user_id
@@ -40,8 +39,16 @@ def lambda_handler(event, context):
         # Parseo y generación de IR
         obj = load(code)
         validate(obj)
-        ir = to_ir(obj)
-        mermaid_code = ir_to_mermaid(ir)
+        # Mapear los valores cortos del frontend a los nombres esperados por el parser
+        diagram_type_map = {
+            'flowchart': 'flowchart',
+            'sequence': 'sequenceDiagram',
+            'class': 'classDiagram',
+            'state': 'stateDiagram',
+            'er': 'erDiagram',
+        }
+        diagram_type = diagram_type_map.get(diagram_type, 'flowchart')
+        mermaid_code = to_ir(obj, diagram_type)
 
         # Generar diagram_id y nombres de archivo
         diagram_id = str(uuid.uuid4())
