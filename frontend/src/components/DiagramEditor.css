@@ -1,0 +1,151 @@
+/* src/components/DiagramEditor.css */
+
+/* Contenedor principal con fondo */
+.diagram-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  min-height: 100vh;
+  background-image: url('../assets/edit.jpeg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* Título principal (BATIFAMILIA) con sombreado */
+.page-title {
+  text-align: center;
+  font-size: 2rem;
+  color: white;
+  padding: 16px 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Subtítulo (Editor de Diagramas) sin sombreado */
+.editor-header {
+  text-align: center;
+  color: #F4B315;
+  padding: 8px 0;
+  background: none;
+}
+
+/* Contenedor de los dos bloques – ocupa todo el espacio entre header y “piso” */
+.blocks-container {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 0 24px 16px;  /* 16px de espacio debajo */
+  box-sizing: border-box;
+  align-items: stretch;   /* estira la altura de los bloques */
+}
+
+/* Cada bloque: igual ancho y altura completa */
+.block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Controles superiores dentro del bloque izquierdo */
+.top-controls {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* 1) Estilo para el SELECT con flecha y más espacio */
+.top-controls select {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  appearance: none;
+  cursor: pointer;
+
+  /* flecha SVG en data-URI */
+  background-image: url("data:image/svg+xml,%3Csvg fill='%23666'%20height='10'%20viewBox='0%200%2010%206'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cpath%20d='M0,0%20L5,6%20L10,0'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+  /* padding: top/right/bottom/left */
+  padding: 8px 36px 8px 12px;  /* 36px a la derecha para separar texto-flecha */
+}
+
+/* 2) Estilo para el INPUT FILE sin flecha */
+.top-controls input[type="file"] {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  appearance: auto;          /* vuelve a mostrar el control nativo */
+  background-image: none;    /* elimina cualquier imagen de fondo */
+  padding: 8px 12px;         /* padding estándar */
+}
+
+/* Área central de cada bloque */
+.block-content {
+  flex: 1;
+  padding: 16px;
+}
+
+/* Textarea a pantalla completa en el bloque izquierdo */
+.left-block .block-content textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-family: monospace;
+}
+
+/* Área de previsualización centrada en el bloque derecho */
+.right-block .block-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #aaa;
+}
+
+/* Texto de marcador de posición / cuadro preview */
+.preview-box {
+  font-size: 1.2rem;
+  color: #555;
+}
+.placeholder {
+  color: #999;
+}
+
+/* Botoneras al pie de cada bloque */
+.buttons-container {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Empuja el botón de Generar al fondo del bloque izquierdo */
+.left-block .buttons-container {
+  margin-top: auto;
+}
+
+/* Estilos de los botones */
+.button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #3AB397;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

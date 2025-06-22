@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function SignIn() {
+export default function SignIn({ onLoginSuccess }) {
   return (
     <form className="sign-in">
       <h2>Iniciar Sesión</h2>
@@ -24,7 +24,7 @@ export default function SignIn() {
       </div>
 
       <a href="#">¿Olvidaste tu contraseña?</a>
-      <button className="button">INICIAR SESIÓN</button>
+      <button className="button" onClick={onLoginSuccess}>INICIAR SESIÓN</button>
     </form>
   );
 }
