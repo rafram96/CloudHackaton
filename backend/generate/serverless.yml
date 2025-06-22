@@ -3,6 +3,15 @@ service: generate-service
 
 package:
   individually: true
+  patterns:
+    - '!layers/**'
+    - '!node_modules/**'
+    - '!*.zip'
+    - '!*.tar.gz'
+    - '!__pycache__/**'
+    - '!.git/**'
+    - '!.vscode/**'
+    - '!*.md'
 
 provider:
   name: aws
@@ -17,16 +26,16 @@ provider:
     DIAGRAMS_TABLE: h_diagrams
     BUCKET: diagramas-hackacloud-${self:provider.stage}
 
-    
+
 functions:
   preview:
     handler: handler_preview.lambda_handler
     package:
-      include:
+      patterns:
         - handler_preview.py
         - parser_json.py
-        - renderer.py
         - auth_utils.py
+        - '!**'
     events:
       - http:
           path: /generate/preview
@@ -36,9 +45,10 @@ functions:
   save-frontend:
     handler: handler_save_frontend.lambda_handler
     package:
-      include:
+      patterns:
         - handler_save_frontend.py
         - auth_utils.py
+        - '!**'
     events:
       - http:
           path: /generate/save-frontend

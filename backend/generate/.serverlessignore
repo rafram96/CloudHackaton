@@ -1,0 +1,28 @@
+# Directorios pesados
+layers/**
+node_modules/**
+__pycache__/**
+.git/**
+.vscode/**
+.idea/**
+
+# Archivos innecesarios
+*.md
+*.txt
+*.zip
+*.tar.gz
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+Thumbs.db
+
+# Archivos específicos no usados
+renderer.py
+handler_save.py
+
+# Logs y cache
+*.log
+.pytest_cache/**
+.coverage
+.env
