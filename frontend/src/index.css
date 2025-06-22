@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Bangers", system-ui;
+    font-family: "Noto Sans", sans-serif;
 }
 body {
     width: 100%;
@@ -11,8 +11,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #2a2929;
-
+    /*background-color: #2a2929;*/
+    background-image: url('./assets/back.jpeg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;    /* para que se quede fijo al hacer scroll */
+    background-size: cover;
 }
 .container {
     width: 800px;
@@ -87,7 +91,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     margin-top: 10px;
-    background-color: #3AB397;
+    background-color: #F4B315;
     color: white;
 }
 
@@ -111,7 +115,7 @@ body {
     display: flex;
     align-items: center;
     transform: translateX(100%);
-    background-color: #D4AF37;
+    background-color: #505c7c;
     transition: transform 0.5s ease-in-out, border-radius 0.5s ease-in-out;
     overflow: hidden;
     border-radius: 50% 0 0 50%;
@@ -142,7 +146,7 @@ body {
     text-align: center;
 }
 .container-welcome .button {
-    border: 2px solid white;
+    border: 2px solid #F4B315;
     background-color: transparent;
 }
 .container.toggle .welcome-sign-in {
