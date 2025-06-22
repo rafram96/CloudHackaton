@@ -9,6 +9,7 @@ provider:
   runtime: python3.13
   memorySize: 1024
   timeout: 30
+  stage: ${opt:stage, 'dev'}
   iam:
     role: arn:aws:iam::582232142172:role/LabRole
   environment:
@@ -76,4 +77,9 @@ resources:
     DiagramsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BUCKET: diagramas-hackacloud-${self:provider.stage}
+        BucketName: diagramas-hackacloud-${self:provider.stage}
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
