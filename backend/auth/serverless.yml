@@ -1,0 +1,76 @@
+org: rafaelram
+service: auth-service
+
+provider:
+  name: aws
+  runtime: python3.13
+  memorySize: 512
+  timeout: 30
+  stage: ${opt:stage, 'dev'}
+  iam:
+    role: arn:aws:iam::969784661290:role/LabRole
+  environment:
+    USERS_TABLE: h_users
+    TOKENS_TABLE: h_tokens_access
+
+functions:
+  register:
+    handler: Lambda_CrearUsuario.lambda_handler
+    package:
+      include:
+        - Lambda_CrearUsuario.py
+    events:
+      - http:
+          path: /auth/register
+          method: post
+          cors: true
+
+  login:
+    handler: Lambda_LoginUsuario.lambda_handler
+    package:
+      include:
+        - Lambda_LoginUsuario.py
+    events:
+      - http:
+          path: /auth/login
+          method: post
+          cors: true
+
+  validateToken:
+    handler: Lambda_ValidarTokenAcceso.lambda_handler
+    package:
+      include:
+        - Lambda_ValidarTokenAcceso.py
+    events:
+      - http:
+          path: /auth/validate
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    # TABLA USUARIOS
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: h_users
+        AttributeDefinitions:
+          - AttributeName: user_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: user_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    
+    # TABLA TOKENS
+    TokensTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: h_tokens_access
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
