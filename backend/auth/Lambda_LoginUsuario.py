@@ -1,4 +1,5 @@
 import os
+import json
 import boto3
 import hashlib
 import uuid
@@ -13,10 +14,13 @@ def hash_password(password: str) -> str:
 
 
 def lambda_handler(event, context):
-    user_id = event.get('user_id')
-    password = event.get('password')
+    # Parsear body JSON
+    body = event.get('body', '{}')
+    data = json.loads(body)
+    user_id = data.get('user_id')
+    password = data.get('password')
     if not user_id or not password:
-        return {'statusCode': 400, 'body': {'error': 'Falta user_id o password'}}
+        return {'statusCode': 400, 'body': json.dumps({'error': 'Falta user_id o password'})}
 
     table_users = dynamodb.Table(USERS_TABLE)
     resp = table_users.get_item(Key={'user_id': user_id})
@@ -35,6 +39,6 @@ def lambda_handler(event, context):
     try:
         table_tokens.put_item(Item={'token': token, 'user_id': user_id, 'expires': expires})
     except Exception as e:
-        return {'statusCode': 500, 'body': {'error': str(e)}}
+        return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
 
-    return {'statusCode': 200, 'body': {'token': token}}
+    return {'statusCode': 200, 'body': json.dumps({'token': token})}
