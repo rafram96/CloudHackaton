@@ -26,7 +26,9 @@ def lambda_handler(event, context):
     code = body.get('code', '')
     dtype = body.get('type', '').lower()
     fmt = body.get('format', 'svg')
-    token = body.get('token', '')    # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
+    token = body.get('token', '')
+    
+    # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
     diagram_type = body.get('diagram', '')
     valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram']
     if diagram_type not in valid:
@@ -36,8 +38,8 @@ def lambda_handler(event, context):
         # Validar token y obtener user_id
         user_id = validate_token(token)
 
-        if dtype != 'json':
-            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Tipo no soportado'})}
+        if dtype not in ['json', 'aws', 'er']:
+            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': f'Tipo no soportado: {dtype}. Tipos válidos: json, aws, er'})}
 
         # Parseo y generación de IR
         obj = load(code)
@@ -49,7 +51,9 @@ def lambda_handler(event, context):
         now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         prefix = f"{user_id}/{diagram_id}/"
         source_key = prefix + f'source_{now_str}.txt'
-        image_key = prefix + f'diagram_{now_str}.{fmt}'        # Guardar código fuente en S3
+        image_key = prefix + f'diagram_{now_str}.{fmt}'
+
+        # Guardar código fuente en S3
         s3.put_object(
             Bucket=BUCKET,
             Key=source_key,
@@ -63,12 +67,15 @@ def lambda_handler(event, context):
         tmp_img = f'/tmp/{diagram_id}.{fmt}'
         with open(tmp_mmd, 'w') as f:
             f.write(mermaid_code)
+        
         # Ejecutar mmdc desde layer
         try:
             subprocess.run(['/opt/nodejs/node_modules/.bin/mmdc', '-i', tmp_mmd, '-o', tmp_img], check=True)
         except Exception as e:
             print('Error ejecutando mmdc:', e, file=sys.stderr)
-            raise        # Subir imagen generada
+            raise
+
+        # Subir imagen generada
         with open(tmp_img, 'rb') as f_img:
             s3.put_object(
                 Bucket=BUCKET,
@@ -88,7 +95,8 @@ def lambda_handler(event, context):
             'source_code_s3key': source_key,
             'image_s3key': image_key,
             'format': fmt,
-            'status': 'success'
+            'status': 'success',
+            'diagram_type': diagram_type
         })
 
         # URL pública
@@ -96,5 +104,5 @@ def lambda_handler(event, context):
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'diagram_id': diagram_id, 'url': url})}
 
     except Exception as e:
-        # Error
+        print('Error in lambda:', e, file=sys.stderr)
         return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}

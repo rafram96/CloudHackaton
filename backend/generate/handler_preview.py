@@ -26,11 +26,9 @@ def lambda_handler(event, context):
         token = body.get('token', '')
 
         # Autenticación y multitenancy
-        user_id = validate_token(token)
-
-        # Solo aceptamos JSON por ahora
-        if input_type != 'json':
-            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Tipo no soportado en preview'})}
+        user_id = validate_token(token)        # Solo aceptamos JSON, AWS y ER
+        if input_type not in ['json', 'aws', 'er']:
+            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': f'Tipo no soportado en preview: {input_type}. Tipos válidos: json, aws, er'})}
 
         if not isinstance(code, (str, dict)):
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': "El campo 'code' debe ser un JSON válido o una cadena JSON."})}

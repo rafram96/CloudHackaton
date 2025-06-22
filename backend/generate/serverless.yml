@@ -93,7 +93,8 @@ resources:
             KeyType: HASH
           - AttributeName: diagram_id
             KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST    # Bucket de Diagramas
+        BillingMode: PAY_PER_REQUEST    
+    # Bucket de Diagramas
     DiagramsBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -103,18 +104,7 @@ resources:
           BlockPublicPolicy: false
           IgnorePublicAcls: false
           RestrictPublicBuckets: false
-
-    # Política de bucket para permitir acceso público de lectura
-    DiagramsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref DiagramsBucket
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Sid: PublicReadGetObject
-              Effect: Allow
-              Principal: '*'
-              Action: 's3:GetObject'
-              Resource: 
-                - !Sub '${DiagramsBucket}/*'
+        OwnershipControls:
+          Rules:
+            - ObjectOwnership: ObjectWriter
+        AccessControl: PublicRead
