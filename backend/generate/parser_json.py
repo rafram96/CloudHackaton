@@ -23,40 +23,109 @@ def validate(obj):
 
 
 def to_ir(obj, graph_type='flowchart'):
-    nodes = []
-    edges = []
-
-    def recurse(o, parent_id=None):
-        if isinstance(o, dict):
-            for key, val in o.items():
-                node_id = f"{parent_id}_{key}" if parent_id else key
-                nodes.append({'id': node_id, 'label': key})
-                if parent_id:
-                    edges.append({'from': parent_id, 'to': node_id})
-                recurse(val, node_id)
-        elif isinstance(o, list):
-            for idx, item in enumerate(o):
-                node_id = f"{parent_id}_{idx}"
-                nodes.append({'id': node_id, 'label': str(idx)})
-                edges.append({'from': parent_id, 'to': node_id})
-                recurse(item, node_id)
-        else:
-            leaf_id = f"{parent_id}_val"
-            nodes.append({'id': leaf_id, 'label': str(o)})
-            edges.append({'from': parent_id, 'to': leaf_id})
-    recurse(obj)
-
-    if graph_type == 'sequenceDiagram':
-        # Transform nodes/edges for sequence diagram specifics
-        nodes = [{'id': n['id'], 'label': f"participant {n['label']}"} for n in nodes]
-    elif graph_type == 'classDiagram':
-        # Transform nodes/edges for class diagram specifics
-        nodes = [{'id': n['id'], 'label': f"class {n['label']}"} for n in nodes]
+    if graph_type == 'classDiagram':
+        return generate_class_diagram(obj)
+    elif graph_type == 'sequenceDiagram':
+        return generate_sequence_diagram(obj)
     elif graph_type == 'stateDiagram':
-        # Transform nodes/edges for state diagram specifics
-        nodes = [{'id': n['id'], 'label': f"state {n['label']}"} for n in nodes]
+        return generate_state_diagram(obj)
     elif graph_type == 'erDiagram':
-        # Transform nodes/edges for ER diagram specifics
-        nodes = [{'id': n['id'], 'label': f"entity {n['label']}"} for n in nodes]
+        return generate_er_diagram(obj)
+    
+    # Por defecto, generar flowchart
+    return generate_flowchart(obj)
 
-    return {'nodes': nodes, 'edges': edges}
+def generate_class_diagram(obj):
+    """
+    Convierte un JSON de entrada en código Mermaid para un classDiagram.
+    """
+    classes = obj.get('classes', [])
+    lines = ['classDiagram']
+
+    for cls in classes:
+        class_name = cls['name']
+        lines.append(f'class {class_name} {{')
+
+        for attr in cls.get('attributes', []):
+            lines.append(f'    {attr}')
+
+        for method in cls.get('methods', []):
+            lines.append(f'    {method}')
+
+        lines.append('}')
+
+    for cls in classes:
+        if 'extends' in cls:
+            lines.append(f'{cls["extends"]} <|-- {cls["name"]}')
+
+    return '\n'.join(lines)
+
+def generate_sequence_diagram(obj):
+    """
+    Convierte un JSON de entrada en código Mermaid para un sequenceDiagram.
+    """
+    participants = obj.get('participants', [])
+    messages = obj.get('messages', [])
+    lines = ['sequenceDiagram']
+
+    for participant in participants:
+        lines.append(f'participant {participant}')
+
+    for message in messages:
+        lines.append(f'{message["from"]} ->> {message["to"]}: {message["text"]}')
+
+    return '\n'.join(lines)
+
+def generate_state_diagram(obj):
+    """
+    Convierte un JSON de entrada en código Mermaid para un stateDiagram.
+    """
+    states = obj.get('states', [])
+    transitions = obj.get('transitions', [])
+    lines = ['stateDiagram-v2']
+
+    for state in states:
+        lines.append(f'state {state}')
+
+    for transition in transitions:
+        lines.append(f'{transition["from"]} --> {transition["to"]}: {transition["text"]}')
+
+    return '\n'.join(lines)
+
+def generate_er_diagram(obj):
+    """
+    Convierte un JSON de entrada en código Mermaid para un erDiagram.
+    """
+    entities = obj.get('entities', [])
+    relationships = obj.get('relationships', [])
+    lines = ['erDiagram']
+
+    for entity in entities:
+        lines.append(f'{entity["name"]} {{')
+        for attr in entity.get('attributes', []):
+            lines.append(f'    {attr}')
+        lines.append('}')
+
+    for relationship in relationships:
+        lines.append(f'{relationship["from"]} {relationship["type"]} {relationship["to"]}')
+
+    return '\n'.join(lines)
+
+def generate_flowchart(obj):
+    """
+    Convierte un JSON de entrada en código Mermaid para un flowchart.
+    """
+    nodes = obj.get('nodes', [])
+    edges = obj.get('edges', [])
+    lines = ['graph TD']
+
+    for node in nodes:
+        lines.append(f'{node["id"]}[{node["label"]}]')
+
+    for edge in edges:
+        if 'label' in edge:
+            lines.append(f'{edge["from"]} -->|{edge["label"]}| {edge["to"]}')
+        else:
+            lines.append(f'{edge["from"]} --> {edge["to"]}')
+
+    return '\n'.join(lines)
