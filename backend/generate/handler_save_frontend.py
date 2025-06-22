@@ -49,14 +49,13 @@ def lambda_handler(event, context):
         now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         prefix = f"{user_id}/{diagram_id}/"
         source_key = prefix + f'source_{now_str}.txt'
-        image_key = prefix + f'diagram_{now_str}.{fmt}'
-
-        # Guardar código fuente en S3
+        image_key = prefix + f'diagram_{now_str}.{fmt}'        # Guardar código fuente en S3
         s3.put_object(
             Bucket=BUCKET,
             Key=source_key,
             Body=code,
-            ContentType='text/plain'
+            ContentType='text/plain',
+            ACL='public-read'
         )
 
         # Determinar Content-Type
@@ -73,7 +72,8 @@ def lambda_handler(event, context):
             Bucket=BUCKET,
             Key=image_key,
             Body=image_data,
-            ContentType=content_type
+            ContentType=content_type,
+            ACL='public-read'
         )
 
         # Registrar metadatos en DynamoDB

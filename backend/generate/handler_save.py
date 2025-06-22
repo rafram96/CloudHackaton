@@ -49,14 +49,13 @@ def lambda_handler(event, context):
         now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         prefix = f"{user_id}/{diagram_id}/"
         source_key = prefix + f'source_{now_str}.txt'
-        image_key = prefix + f'diagram_{now_str}.{fmt}'
-
-        # Guardar código fuente en S3
+        image_key = prefix + f'diagram_{now_str}.{fmt}'        # Guardar código fuente en S3
         s3.put_object(
             Bucket=BUCKET,
             Key=source_key,
             Body=code,
-            ContentType='text/plain'
+            ContentType='text/plain',
+            ACL='public-read'
         )
 
         # Generar SVG/PNG con mermaid-cli (mermaid-cli provisto por la layer)
@@ -69,15 +68,14 @@ def lambda_handler(event, context):
             subprocess.run(['/opt/nodejs/node_modules/.bin/mmdc', '-i', tmp_mmd, '-o', tmp_img], check=True)
         except Exception as e:
             print('Error ejecutando mmdc:', e, file=sys.stderr)
-            raise
-
-        # Subir imagen generada
+            raise        # Subir imagen generada
         with open(tmp_img, 'rb') as f_img:
             s3.put_object(
                 Bucket=BUCKET,
                 Key=image_key,
                 Body=f_img,
-                ContentType='image/svg+xml' if fmt=='svg' else 'image/png'
+                ContentType='image/svg+xml' if fmt=='svg' else 'image/png',
+                ACL='public-read'
             )
 
         # Registrar metadatos en DynamoDB
