@@ -3,7 +3,6 @@ import json
 
 HEADERS = {'Access-Control-Allow-Origin': '*'}
 from parser_json import load, validate, to_ir
-from renderer import ir_to_mermaid
 from auth_utils import validate_token
 
 """
@@ -17,28 +16,31 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get('body', '{}'))
         code = body.get('code', '')
-        dtype = body.get('type', '').lower()
+        input_type = body.get('type', '').lower()
+        # Obtener el tipo de diagrama de Mermaid, por defecto 'flowchart'
+        diagram_type = body.get('diagram', '').lower()
+        if diagram_type not in ['flowchart', 'sequence', 'class', 'state', 'er', 'gantt', 'pie', 'journey', 'requirement', 'git', 'mindmap', 'timeline', 'quadrant']:
+            diagram_type = 'flowchart'
         fmt = body.get('format', 'svg')
         token = body.get('token', '')
 
         # Autenticación y multitenancy
         user_id = validate_token(token)
 
-        # Soporte solo JSON en preview
-        if dtype != 'json':
+        # Solo aceptamos JSON por ahora
+        if input_type != 'json':
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Tipo no soportado en preview'})}
 
-        # Validar que 'code' sea un JSON válido
         if not isinstance(code, (str, dict)):
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': "El campo 'code' debe ser un JSON válido o una cadena JSON."})}
 
-        # Parseo y validación
+        # Generar código Mermaid directamente desde el parser
         obj = load(code)
         validate(obj)
-        ir = to_ir(obj)
-        mermaid_code = ir_to_mermaid(ir)
+        mermaid_code = to_ir(obj, diagram_type)
 
-        # Devolver mermaid syntax para render en cliente
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'diagram': mermaid_code})}
+
     except Exception as e:
         return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}
+
