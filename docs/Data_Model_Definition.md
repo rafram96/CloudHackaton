@@ -44,17 +44,12 @@
 ## 7. Librerías Recomendadas
 - Frontend:
   - React, Vite
-  - react-monaco-editor o @uiw/react-md-editor
   - mermaid (renderizado de diagramas en cliente)
-  - axios o fetch (peticiones HTTP)
   - file-saver (exportar PNG/SVG/PDF)
 - Backend (Python Lambda):
-  - boto3 (S3, DynamoDB)
-  - python-jose (JWT)
   - diagrams (mingrammer)  
   - ERAlchemy (diagramas E-R)
   - json2graph (estructuras JSON)
-  - mermaid-cli (generación de SVG/PNG vía CLI)
   - Pillow o reportlab (conversión a PNG/PDF)
 
 ---
