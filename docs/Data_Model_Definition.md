@@ -10,7 +10,6 @@
 | Entidad  | Atributo           | Tipo         | Descripción                                 |
 |----------|--------------------|--------------|---------------------------------------------|
 | Usuario  | user_id            | String (PK)  | Identificador único de usuario              |
-| Usuario  | email              | String (GSI) | Correo electrónico (índice para búsquedas)  |
 | Diagrama | diagram_id         | String (PK)  | Identificador único de diagrama             |
 | Diagrama | owner_id           | String (GSI) | user_id del creador                         |
 | Diagrama | type               | String       | Tipo de diagrama (`aws`, `er`, `json`)     |

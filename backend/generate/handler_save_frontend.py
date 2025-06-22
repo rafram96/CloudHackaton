@@ -24,12 +24,14 @@ def lambda_handler(event, context):
     Response: { diagram_id, url }
     """
     try:
+        # Cargar cuerpo y token del header
         body = json.loads(event.get('body', '{}'))
+        auth_header = event.get('headers', {}).get('Authorization', '')
+        token = auth_header.replace('Bearer ', '')
         image_base64 = body.get('image_base64', '')
         input_type = body.get('type', 'frontend').lower()
         fmt = body.get('format', 'png').lower()  # Default PNG desde frontend
         diagram_type = body.get('diagram', 'flowchart')
-        token = body.get('token', '')
         code = body.get('code', '{}')  # Para metadatos
 
         # Validar token y obtener user_id

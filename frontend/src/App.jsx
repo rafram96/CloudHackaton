@@ -200,8 +200,11 @@ export default function App() {
 
       const res = await fetch(`${GENERATE_URL}/generate/preview`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, type: inputType, format: 'svg', diagram: graphType, token })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ code, type: inputType, format: 'svg', diagram: graphType })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -249,13 +252,15 @@ export default function App() {
       // Enviar al backend
       const res = await fetch(`${GENERATE_URL}/generate/save-frontend`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           image_base64: imageBase64,
           type: inputType,
           format: format,
           diagram: graphType,
-          token: token,
           code: code
         })
       });

@@ -14,13 +14,15 @@ Response: { diagram: mermaid_syntax }
 
 def lambda_handler(event, context):
     try:
+        # Cargar parámetros
         body = json.loads(event.get('body', '{}'))
         code = body.get('code', '')
         input_type = body.get('type', '').lower()
-        # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
         diagram_type = body.get('diagram', '')
         fmt = body.get('format', 'svg')
-        token = body.get('token', '')
+        # Extraer token JWT del header Authorization
+        auth_header = event.get('headers', {}).get('Authorization', '')
+        token = auth_header.replace('Bearer ', '')
 
         # Autenticación y multitenancy
         user_id = validate_token(token)        # Solo aceptamos JSON, AWS y ER
