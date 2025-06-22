@@ -20,14 +20,23 @@ def lambda_handler(event, context):
     """
     Endpoint para guardar diagramas desde imagen base64 del frontend
     Endpoint: POST /generate/save-frontend
-    Body JSON: { image_base64, type, format, diagram, token, code }
+    Body JSON: { image_base64, type, format, diagram, code }
     Response: { diagram_id, url }
     """
     try:
         # Cargar cuerpo y token del header
         body = json.loads(event.get('body', '{}'))
-        auth_header = event.get('headers', {}).get('Authorization', '')
-        token = auth_header.replace('Bearer ', '')
+        headers = event.get('headers', {})
+        auth_header = headers.get('Authorization') or headers.get('authorization', '')
+        
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Token de autorización requerido'})}
+        
+        token = auth_header.replace('Bearer ', '').strip()
+        
+        if not token:
+            return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Token vacío no válido'})}
+
         image_base64 = body.get('image_base64', '')
         input_type = body.get('type', 'frontend').lower()
         fmt = body.get('format', 'png').lower()  # Default PNG desde frontend

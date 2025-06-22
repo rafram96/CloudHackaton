@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
-import WelcomePanel from './components/WelcomePanel';
-import './index.css';
-import './main.css';
+import './styles.css';
 import mermaid from 'mermaid';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -23,22 +19,18 @@ export default function App() {
 
   // Editor y preview
   const [code, setCode] = useState('{}');
-  const [inputType, setInputType] = useState('json'); // Tipo de entrada: json, aws, er
+  const [inputType, setInputType] = useState('json');
   const [diagram, setDiagram] = useState('');
   const [diagramUrl, setDiagramUrl] = useState('');
-  const [showCode, setShowCode] = useState(false);
   const [error, setError] = useState('');
-  const [graphType, setGraphType] = useState('flowchart'); // Tipo de gráfico por defecto
-  const [saveFormat, setSaveFormat] = useState('svg'); // Formato de guardado por defecto
+  const [graphType, setGraphType] = useState('flowchart');
+  const [saveFormat, setSaveFormat] = useState('svg');
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDropModal, setShowDropModal] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Cargar preferencia guardada o usar preferencia del sistema
-    const saved = localStorage.getItem('darkMode');
-    if (saved !== null) return JSON.parse(saved);
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const [isLoadingFile, setIsLoadingFile] = useState(false);  const [isLoading, setIsLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true); // Batman siempre en modo oscuro
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    return localStorage.getItem('selectedTheme') || 'batman';
   });
 
   // Ejemplos predefinidos por tipo de entrada
@@ -46,67 +38,54 @@ export default function App() {
     json: {
       flowchart: {
         "nodes": [
-          {"id": "A", "label": "Inicio"},
-          {"id": "B", "label": "Proceso"},
-          {"id": "C", "label": "Decisión"},
-          {"id": "D", "label": "Fin"}
+          {"id": "A", "label": "🦇 Vigilancia"},
+          {"id": "B", "label": "🔍 Investigación"},
+          {"id": "C", "label": "⚔️ Combate"},
+          {"id": "D", "label": "🏆 Justicia"}
         ],
         "edges": [
           {"from": "A", "to": "B"},
-          {"from": "B", "to": "C", "label": "evaluar"},
-          {"from": "C", "to": "D", "label": "sí"}
+          {"from": "B", "to": "C", "label": "evidencia"},
+          {"from": "C", "to": "D", "label": "victoria"}
         ]
       },
       sequenceDiagram: {
-        "participants": ["Usuario", "Frontend", "Backend", "DB"],
+        "participants": ["Batman", "Gordon", "Batcomputer", "Criminal"],
         "messages": [
-          {"from": "Usuario", "to": "Frontend", "text": "login"},
-          {"from": "Frontend", "to": "Backend", "text": "authenticate"},
-          {"from": "Backend", "to": "DB", "text": "verify user"},
-          {"from": "DB", "to": "Backend", "text": "user data"},
-          {"from": "Backend", "to": "Frontend", "text": "token"}
+          {"from": "Gordon", "to": "Batman", "text": "Signal activated"},
+          {"from": "Batman", "to": "Batcomputer", "text": "Analyze threat"},
+          {"from": "Batcomputer", "to": "Batman", "text": "Location found"},
+          {"from": "Batman", "to": "Criminal", "text": "Justice served"}
         ]
       },
       classDiagram: {
         "classes": [
           {
-            "name": "User",
-            "attributes": ["id: string", "name: string", "email: string"],
-            "methods": ["login()", "logout()", "updateProfile()"]
+            "name": "Hero",
+            "attributes": ["name: string", "city: string", "suit: string"],
+            "methods": ["fight()", "protect()", "investigate()"]
           },
           {
-            "name": "Admin",
-            "attributes": ["permissions: array"],
-            "methods": ["manageUsers()", "viewLogs()"],
-            "extends": "User"
+            "name": "Batman",
+            "attributes": ["gadgets: array", "cave: location"],
+            "methods": ["glide()", "stealth()", "analyze()"],
+            "extends": "Hero"
           }
-        ]
-      },
-      stateDiagram: {
-        "states": ["Idle", "Loading", "Success", "Error"],
-        "transitions": [
-          {"from": "Idle", "to": "Loading", "text": "start"},
-          {"from": "Loading", "to": "Success", "text": "complete"},
-          {"from": "Loading", "to": "Error", "text": "fail"},
-          {"from": "Success", "to": "Idle", "text": "reset"},
-          {"from": "Error", "to": "Idle", "text": "retry"}
         ]
       }
     },
     aws: {
       flowchart: {
         "components": [
-          {"id": "user", "type": "user", "label": "Cliente"},
-          {"id": "cloudfront", "type": "cloudfront", "label": "CloudFront"},
-          {"id": "s3", "type": "s3", "label": "S3 Bucket"},
-          {"id": "lambda", "type": "lambda", "label": "Lambda Function"},
-          {"id": "dynamodb", "type": "dynamodb", "label": "DynamoDB"}
+          {"id": "user", "type": "user", "label": "🦇 Ciudadano"},
+          {"id": "cloudfront", "type": "cloudfront", "label": "Bat-Signal"},
+          {"id": "lambda", "type": "lambda", "label": "Bat-Computer"},
+          {"id": "dynamodb", "type": "dynamodb", "label": "Bat-Cave DB"}
         ],
         "connections": [
-          {"from": "user", "to": "cloudfront", "label": "HTTPS"},
-          {"from": "cloudfront", "to": "s3", "label": "static files"},
-          {"from": "cloudfront", "to": "lambda", "label": "API calls"},
-          {"from": "lambda", "to": "dynamodb", "label": "queries"}
+          {"from": "user", "to": "cloudfront", "label": "emergency"},
+          {"from": "cloudfront", "to": "lambda", "label": "process"},
+          {"from": "lambda", "to": "dynamodb", "label": "store"}
         ]
       }
     },
@@ -114,44 +93,102 @@ export default function App() {
       flowchart: {
         "entities": [
           {
-            "name": "Usuario",
-            "attributes": ["id (PK)", "nombre", "email", "fecha_registro"],
+            "name": "Hero",
+            "attributes": ["id (PK)", "name", "city", "power_level"],
             "type": "entity"
           },
           {
-            "name": "Pedido",
-            "attributes": ["id (PK)", "fecha", "total", "usuario_id (FK)"],
+            "name": "Mission",
+            "attributes": ["id (PK)", "title", "danger_level", "hero_id (FK)"],
             "type": "entity"
-          },
-          {
-            "name": "Producto",
-            "attributes": ["id (PK)", "nombre", "precio", "stock"],
-            "type": "entity"
-          },
-          {
-            "name": "DetallePedido",
-            "attributes": ["pedido_id (FK)", "producto_id (FK)", "cantidad", "precio_unitario"],
-            "type": "relationship"
           }
         ],
         "relationships": [
-          {"from": "Usuario", "to": "Pedido", "type": "1:N", "label": "realiza"},
-          {"from": "Pedido", "to": "DetallePedido", "type": "1:N", "label": "contiene"},
-          {"from": "Producto", "to": "DetallePedido", "type": "1:N", "label": "incluido_en"}
+          {"from": "Hero", "to": "Mission", "type": "1:N", "label": "undertakes"}
         ]
       }
     }
   };
+  // Temas disponibles
+  const themes = {
+    batman: {
+      name: '🦇 Batman',
+      title: '🦇 BAT-DIAGRAM GENERATOR',
+      logoutText: '🚪 Salir de la Cueva',
+      userIcon: '👤',
+      colors: {
+        primary: '#FFD700',
+        secondary: '#2C2C2C',
+        background: '#0A0A0A',
+        text: '#E5E5E5'
+      }
+    },
+    robin: {
+      name: '🐦 Robin',
+      title: '🐦 ROBIN-DIAGRAM ANALYZER',
+      logoutText: '🏃 Volver a la Base',
+      userIcon: '🦸‍♂️',
+      colors: {
+        primary: '#FF4500',
+        secondary: '#228B22',
+        background: '#0F2A0F',
+        text: '#FFFFFF'
+      }
+    },
+    joker: {
+      name: '🃏 Joker',
+      title: '🃏 CHAOS-DIAGRAM CREATOR',
+      logoutText: '😈 Salir Riéndose',
+      userIcon: '🎭',
+      colors: {
+        primary: '#800080',
+        secondary: '#32CD32',
+        background: '#1A0A1A',
+        text: '#FFFFFF'
+      }
+    },
+    catwoman: {
+      name: '🐱 Catwoman',
+      title: '🐱 FELINE-DIAGRAM DESIGNER',
+      logoutText: '🌙 Escapar Sigilosamente',
+      userIcon: '👩‍🦱',
+      colors: {
+        primary: '#C0C0C0',
+        secondary: '#000000',
+        background: '#1C1C1C',
+        text: '#E0E0E0'
+      }
+    },
+    superman: {
+      name: '🦸 Superman',
+      title: '🦸 SUPER-DIAGRAM FORGE',
+      logoutText: '🚀 Volar a Metrópolis',
+      userIcon: '🔥',
+      colors: {
+        primary: '#DC143C',
+        secondary: '#0066CC',
+        background: '#001122',
+        text: '#FFFFFF'
+      }
+    }
+  };
+
+  const activeTheme = themes[currentTheme];
 
   // Referencia y ID único para render Mermaid
   const svgRef = useRef(null);
   const mermaidId = useMemo(() => `mmd-${Math.random().toString(36).substr(2,9)}`, []);
-  // Funciones de autenticación
+
+  // Función para cambiar tema
+  function changeTheme(newTheme) {
+    setCurrentTheme(newTheme);
+    localStorage.setItem('selectedTheme', newTheme);
+  }  // Funciones de autenticación
   async function handleLogin(e) {
     e.preventDefault();
     setAuthError('');
     try {
-      const res = await fetch(`${AUTH_URL}/login`, {
+      const res = await fetch(`${AUTH_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, password })
@@ -169,14 +206,14 @@ export default function App() {
     setAuthError('');
     setRegisterMessage('');
     try {
-      const res = await fetch(`${AUTH_URL}/register`, {
+      const res = await fetch(`${AUTH_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, password })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Register failed');
-      setRegisterMessage(data.message || 'Usuario registrado');
+      setRegisterMessage(data.message || 'Héroe registrado en la Liga');
       setIsRegistering(false);
     } catch (err) {
       setAuthError(err.message);
@@ -189,6 +226,11 @@ export default function App() {
     setIsLoading(true);
     
     try {
+      // Validar que tenemos token
+      if (!token || token.trim() === '') {
+        throw new Error('No hay token de autenticación. Inicia sesión nuevamente.');
+      }
+
       // Validar JSON antes de enviar (solo para tipo JSON)
       if (inputType === 'json') {
         try {
@@ -202,28 +244,34 @@ export default function App() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token.trim()}`
         },
         body: JSON.stringify({ code, type: inputType, format: 'svg', diagram: graphType })
       });
+      
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
       setDiagram(data.diagram);
     } catch (err) {
       setError(err.message);
+      console.error('Preview error:', err);
     } finally {
       setIsLoading(false);
     }
-  }
-  async function handleSaveFromPreview() {
+  }  async function handleSaveFromPreview() {
     if (!svgRef.current || !diagram) {
       setError('No hay preview para guardar');
       return;
     }
 
+    // Validar token antes de proceder
+    if (!token || token.trim() === '') {
+      setError('No hay token de autenticación. Inicia sesión nuevamente.');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Capturar imagen desde el SVG renderizado
       const svgElement = svgRef.current.querySelector('svg');
       if (!svgElement) {
         setError('No se encontró elemento SVG');
@@ -235,26 +283,23 @@ export default function App() {
       let format = saveFormat;
 
       if (format === 'svg') {
-        // Para SVG, obtener el código directo
         const svgData = new XMLSerializer().serializeToString(svgElement);
         imageBase64 = btoa(unescape(encodeURIComponent(svgData)));
       } else {
-        // Para PNG, usar html2canvas
         const canvas = await html2canvas(svgElement, {
-          backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+          backgroundColor: '#0a0a0a',
           scale: 2
         });
         const dataURL = canvas.toDataURL('image/png');
-        imageBase64 = dataURL.split(',')[1]; // Remover el prefijo data:image/png;base64,
+        imageBase64 = dataURL.split(',')[1];
         format = 'png';
       }
 
-      // Enviar al backend
       const res = await fetch(`${GENERATE_URL}/generate/save-frontend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token.trim()}`
         },
         body: JSON.stringify({
           image_base64: imageBase64,
@@ -266,16 +311,18 @@ export default function App() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
       
       setDiagramUrl(data.url);
-      alert(`Diagrama guardado desde preview. URL: ${data.url}`);
+      alert(`🦇 Diagrama guardado en la Bat-Cueva. URL: ${data.url}`);
     } catch (err) {
       setError(`Error guardando desde preview: ${err.message}`);
+      console.error('Save error:', err);
     } finally {
       setIsLoading(false);
     }
   }
+
   function handleLogout() {
     setToken('');
     setUserId('');
@@ -289,7 +336,6 @@ export default function App() {
     setInputType('json');
     setGraphType('flowchart');
     setSaveFormat('svg');
-    setShowCode(false);
     setIsLoading(false);
   }
 
@@ -515,116 +561,222 @@ Ejemplo:
     
     setDiagram('');
     setError('');
-  }, [inputType]);
+  }, [inputType]);  // Componente SignIn integrado
+  const SignIn = () => (
+    <div className="auth-form">
+      <div className="auth-header">
+        <h2>{activeTheme.name} ACCESO AL SISTEMA</h2>
+        <p>Identifícate para acceder</p>
+      </div>
+      <form onSubmit={handleLogin}>
+        <div className="input-group">
+          <label>{activeTheme.userIcon} Identificación</label>
+          <input
+            type="text"
+            placeholder={`Usuario ${activeTheme.name}`}
+            value={userId}
+            onChange={e => setUserId(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input-group">
+          <label>🔒 Clave de Acceso</label>
+          <input
+            type="password"
+            placeholder="Contraseña secreta"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {authError && <div className="error-message">❌ {authError}</div>}
+        <button type="submit" className="btn-primary">
+          🚀 ACCEDER AL SISTEMA
+        </button>
+        <p className="switch-text">
+          ¿No tienes acceso?{' '}
+          <button type="button" className="link-btn" onClick={() => setIsRegistering(true)}>
+            Solicita autorización
+          </button>
+        </p>
+      </form>
+      
+      {/* Selector de tema en login */}
+      <div className="theme-selector">
+        <label>🎨 Elige tu tema:</label>
+        <div className="theme-options">
+          {Object.entries(themes).map(([key, theme]) => (
+            <button
+              key={key}
+              type="button"
+              className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
+              onClick={() => changeTheme(key)}
+            >
+              {theme.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+  // Componente SignUp integrado
+  const SignUp = () => (
+    <div className="auth-form">
+      <div className="auth-header">
+        <h2>{activeTheme.name} REGISTRO</h2>
+        <p>Únete al equipo</p>
+      </div>
+      <form onSubmit={handleRegister}>
+        <div className="input-group">
+          <label>{activeTheme.userIcon} Nombre del Héroe</label>
+          <input
+            type="text"
+            placeholder="Tu nombre de héroe"
+            value={userId}
+            onChange={e => setUserId(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input-group">
+          <label>🔐 Código Secreto</label>
+          <input
+            type="password"
+            placeholder="Contraseña ultra secreta"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        {authError && <div className="error-message">❌ {authError}</div>}
+        <button type="submit" className="btn-primary">
+          ⚡ REGISTRAR HÉROE
+        </button>
+        <p className="switch-text">
+          ¿Ya tienes acceso?{' '}
+          <button type="button" className="link-btn" onClick={() => setIsRegistering(false)}>
+            Iniciar sesión
+          </button>
+        </p>
+      </form>
 
+      {/* Selector de tema en registro también */}
+      <div className="theme-selector">
+        <label>🎨 Elige tu tema:</label>
+        <div className="theme-options">
+          {Object.entries(themes).map(([key, theme]) => (
+            <button
+              key={key}
+              type="button"
+              className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
+              onClick={() => changeTheme(key)}
+            >
+              {theme.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
   if (!token) {
     return (
-      <div className="container">
-        {isRegistering ? (
-          <SignUp 
-            onSubmit={handleRegister} 
-            onSwitch={() => setIsRegistering(false)} 
-            error={authError}
-            userId={userId}
-            setUserId={setUserId}
-            password={password}
-            setPassword={setPassword}
-          />
-        ) : (
-          <SignIn 
-            onSubmit={handleLogin} 
-            onSwitch={() => setIsRegistering(true)} 
-            error={authError}
-            userId={userId}
-            setUserId={setUserId}
-            password={password}
-            setPassword={setPassword}
-          />
-        )}
-        <WelcomePanel
-          toggled={isRegistering}
-          onSignIn={() => setIsRegistering(false)}
-          onSignUp={() => setIsRegistering(true)}
-        />
-        {registerMessage && (
-          <div className="register-success">{registerMessage}</div>
-        )}
+      <div className={`auth-container theme-${currentTheme}`}>
+        <div className="auth-background">
+          <div className="theme-symbol">{activeTheme.name.split(' ')[0]}</div>
+        </div>
+        <div className="auth-content">
+          {isRegistering ? <SignUp /> : <SignIn />}
+          {registerMessage && (
+            <div className="success-message">✅ {registerMessage}</div>
+          )}
+        </div>
       </div>
     );
   }
-
   return (
-    <div className={`app-container ${isDarkMode ? 'dark-mode' : ''}`}>
-      {/* Header con logout y modo oscuro */}
+    <div className={`app-container theme-${currentTheme}`}>
+      {/* Header dinámico según tema */}
       <header className="main-header">
-        <h1 className="main-title">🎨 Editor de Diagramas</h1>
+        <h1 className="main-title">{activeTheme.title}</h1>
         <div className="header-controls">
-          <button className="btn-dark-mode" onClick={toggleDarkMode}>
-            {isDarkMode ? '☀️' : '🌙'}
+          {/* Selector de tema en el header */}
+          <div className="theme-selector-mini">
+            <select 
+              value={currentTheme} 
+              onChange={e => changeTheme(e.target.value)}
+              className="theme-select"
+            >
+              {Object.entries(themes).map(([key, theme]) => (
+                <option key={key} value={key}>{theme.name}</option>
+              ))}
+            </select>
+          </div>
+          <span className="user-info">{activeTheme.userIcon} {userId}</span>
+          <button className="btn-logout" onClick={handleLogout}>
+            {activeTheme.logoutText}
           </button>
-          <button className="btn-logout" onClick={handleLogout}>🚪 Cerrar Sesión</button>
         </div>
       </header>
 
       <div className="main-content">
-        {/* Panel de configuración */}
+        {/* Panel de configuración con temática Batman */}
         <div className="config-panel">
+          <h3>⚙️ CONFIGURACIÓN DEL SISTEMA</h3>
+          
           <div className="config-section">
-            <label>Tipo de entrada:</label>
+            <label>📊 Tipo de Análisis:</label>
             <select 
               value={inputType} 
               onChange={e => setInputType(e.target.value)}
               className="select-input"
             >
-              <option value="json">JSON</option>
-              <option value="aws">AWS Architecture</option>
-              <option value="er">Entity Relationship</option>
+              <option value="json">🔍 Análisis JSON</option>
+              <option value="aws">☁️ Arquitectura AWS</option>
+              <option value="er">🗃️ Base de Datos</option>
             </select>
           </div>
 
-          {/* Solo mostrar selector de diagrama para JSON */}
           {inputType === 'json' && (
             <div className="config-section">
-              <label>Tipo de diagrama:</label>
+              <label>📋 Tipo de Diagrama:</label>
               <select 
                 value={graphType} 
                 onChange={e => setGraphType(e.target.value)}
                 className="select-input"
               >
-                <option value="flowchart">Flowchart</option>
-                <option value="sequenceDiagram">Sequence</option>
-                <option value="classDiagram">Class</option>
-                <option value="stateDiagram">State</option>
+                <option value="flowchart">🔄 Flujo de Procesos</option>
+                <option value="sequenceDiagram">📱 Secuencia</option>
+                <option value="classDiagram">🏗️ Clases</option>
+                <option value="stateDiagram">🔄 Estados</option>
               </select>
             </div>
           )}
 
           <div className="config-section">
-            <label>Formato de guardado:</label>
+            <label>💾 Formato de Salida:</label>
             <select 
               value={saveFormat} 
               onChange={e => setSaveFormat(e.target.value)}
               className="select-input"
             >
-              <option value="svg">SVG</option>
-              <option value="png">PNG</option>
+              <option value="svg">🎨 SVG Vector</option>
+              <option value="png">🖼️ PNG Imagen</option>
             </select>
           </div>
         </div>
 
-        {/* Editor de código */}
+        {/* Editor con temática Batman */}
         <div className="editor-panel">
           <div className="editor-header">
-            <h3>📝 Editor de Código</h3>
+            <h3>� BAT-EDITOR</h3>
             <div className="editor-actions">
               <button onClick={loadExample} className="btn-secondary">
-                💡 Ejemplo
+                💡 Cargar Ejemplo
               </button>
               <button onClick={handlePasteFromClipboard} className="btn-secondary">
-                📋 Pegar
+                📋 Pegar Código
               </button>
               <button onClick={openFileUploadModal} className="btn-secondary">
-                📁 Cargar archivo
+                📁 Cargar Archivo
               </button>
             </div>
           </div>
@@ -645,7 +797,7 @@ Ejemplo:
             {isDragOver && (
               <div className="drag-overlay">
                 <div className="drag-message">
-                  📂 Suelta tu archivo aquí
+                  🦇 Suelta el archivo aquí
                 </div>
               </div>
             )}
@@ -657,17 +809,17 @@ Ejemplo:
               className="btn-primary"
               disabled={isLoading || !code.trim()}
             >
-              {isLoading ? '⏳ Generando...' : '👀 Vista Previa'}
+              {isLoading ? '⏳ Analizando...' : '� ANALIZAR CÓDIGO'}
             </button>
-            {error && <div className="error-message">❌ {error}</div>}
+            {error && <div className="error-message">⚠️ {error}</div>}
           </div>
         </div>
 
-        {/* Panel de preview */}
+        {/* Panel de preview con temática Batman */}
         {diagram && (
           <div className="preview-panel">
             <div className="preview-header">
-              <h3>🎯 Vista Previa</h3>
+              <h3>👁️ VISUALIZACIÓN</h3>
               <div className="preview-actions">
                 <button 
                   onClick={exportSvgToPDF} 
@@ -681,7 +833,7 @@ Ejemplo:
                   className="btn-primary"
                   disabled={isLoading}
                 >
-                  {isLoading ? '⏳ Guardando...' : '💾 Guardar'}
+                  {isLoading ? '⏳ Guardando...' : '💾 GUARDAR EN BAT-CUEVA'}
                 </button>
               </div>
             </div>
@@ -692,9 +844,9 @@ Ejemplo:
 
             {diagramUrl && (
               <div className="diagram-url">
-                <strong>✅ Diagrama guardado:</strong>
+                <strong>✅ Archivo guardado en la Bat-Cueva:</strong>
                 <a href={diagramUrl} target="_blank" rel="noopener noreferrer">
-                  {diagramUrl}
+                  🔗 {diagramUrl}
                 </a>
               </div>
             )}
@@ -702,12 +854,12 @@ Ejemplo:
         )}
       </div>
 
-      {/* Modal para drag & drop */}
+      {/* Modal con temática Batman */}
       {showDropModal && (
         <div className="modal-overlay" onClick={closeFileUploadModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>📁 Cargar archivo</h3>
+              <h3>📁 CARGAR ARCHIVO AL SISTEMA</h3>
               <button className="modal-close" onClick={closeFileUploadModal}>✕</button>
             </div>
             <div className="modal-body">
@@ -718,7 +870,7 @@ Ejemplo:
                 onDrop={handleDrop}
               >
                 <div className="drop-message">
-                  <div className="drop-icon">📂</div>
+                  <div className="drop-icon">🦇</div>
                   <p>Arrastra tu archivo aquí o</p>
                   <input
                     type="file"
@@ -728,13 +880,13 @@ Ejemplo:
                     id="file-input"
                   />
                   <label htmlFor="file-input" className="btn-secondary">
-                    Seleccionar archivo
+                    📂 Seleccionar Archivo
                   </label>
                   <small>Solo archivos .txt y .json</small>
                 </div>
               </div>
               {isLoadingFile && (
-                <div className="loading-message">⏳ Cargando archivo...</div>
+                <div className="loading-message">⏳ Procesando archivo...</div>
               )}
             </div>
           </div>

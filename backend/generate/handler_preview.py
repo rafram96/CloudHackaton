@@ -20,12 +20,21 @@ def lambda_handler(event, context):
         input_type = body.get('type', '').lower()
         diagram_type = body.get('diagram', '')
         fmt = body.get('format', 'svg')
+        
         # Extraer token JWT del header Authorization
-        auth_header = event.get('headers', {}).get('Authorization', '')
-        token = auth_header.replace('Bearer ', '')
+        headers = event.get('headers', {})
+        auth_header = headers.get('Authorization') or headers.get('authorization', '')
+        
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Token de autorización requerido'})}
+        
+        token = auth_header.replace('Bearer ', '').strip()
+        
+        if not token:
+            return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Token vacío no válido'})}
 
         # Autenticación y multitenancy
-        user_id = validate_token(token)        # Solo aceptamos JSON, AWS y ER
+        user_id = validate_token(token)# Solo aceptamos JSON, AWS y ER
         if input_type not in ['json', 'aws', 'er']:
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': f'Tipo no soportado en preview: {input_type}. Tipos válidos: json, aws, er'})}
 
