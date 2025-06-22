@@ -8,7 +8,6 @@
 
 2. **Hosting Frontend**
    - S3 estático con React/Vite.  
-   - Opcional: CloudFront como CDN para acelerar la entrega.
 
 3. **API Gateway**
    - **POST /generate** (protegida con JWT) → Lambda "Generate Diagram".
@@ -30,10 +29,3 @@
    - Usuario → S3 (descarga frontend)
    - Frontend → POST /generate → API Gateway → Lambda → S3 (almacena)
    - Frontend → GET /diagram/{id} → API Gateway → S3 (recupera)
-
-6. **Infraestructura & CI/CD**
-   - IaC con AWS CDK (Python/TypeScript) o Terraform.
-   - GitHub Actions para:
-     - Deploy frontend a S3.
-     - Empaquetado y despliegue de Lambdas y API Gateway.
-     - Ejecución de tests (pytest+moto, jest/react-testing-library).
