@@ -24,12 +24,10 @@ def lambda_handler(event, context):
 
     table_users = dynamodb.Table(USERS_TABLE)
     resp = table_users.get_item(Key={'user_id': user_id})
-    if 'Item' not in resp:
-        return {'statusCode': 403, 'body': {'error': 'Usuario no existe'}}
-
-    stored_hash = resp['Item'].get('hash_password')
-    if hash_password(password) != stored_hash:
-        return {'statusCode': 403, 'body': {'error': 'Password incorrecto'}}
+    stored_hash = resp.get('Item', {}).get('hash_password')
+    # Usuario no encontrado o password incorrecto
+    if not stored_hash or hash_password(password) != stored_hash:
+        return {'statusCode': 401, 'body': json.dumps({'error': 'Usuario o contraseña incorrectos'})}
 
     # Generar token y expiración
     token = str(uuid.uuid4())
