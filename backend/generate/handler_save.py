@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 import subprocess
+import sys
 from datetime import datetime
 import boto3
 
@@ -15,6 +16,9 @@ s3 = boto3.client('s3')
 TOKENS_TABLE = os.environ['TOKENS_TABLE']
 DIAGRAMS_TABLE = os.environ['DIAGRAMS_TABLE']
 BUCKET = os.environ['BUCKET']
+
+# Asegurar que /opt/nodejs/.bin esté en PATH para poder ejecutar mmdc
+os.environ['PATH'] += os.pathsep + '/opt/nodejs/node_modules/.bin'
 
 HEADERS = {'Access-Control-Allow-Origin': '*'}
 
@@ -53,12 +57,17 @@ def lambda_handler(event, context):
             ContentType='text/plain'
         )
 
-        # Generar SVG/PNG con mermaid-cli
+        # Generar SVG/PNG con mermaid-cli (mermaid-cli provisto por la layer)
         tmp_mmd = f'/tmp/{diagram_id}.mmd'
         tmp_img = f'/tmp/{diagram_id}.{fmt}'
         with open(tmp_mmd, 'w') as f:
             f.write(mermaid_code)
-        subprocess.run(['mmdc', '-i', tmp_mmd, '-o', tmp_img], check=True)
+        # Ejecutar mmdc desde layer
+        try:
+            subprocess.run(['/opt/nodejs/node_modules/.bin/mmdc', '-i', tmp_mmd, '-o', tmp_img], check=True)
+        except Exception as e:
+            print('Error ejecutando mmdc:', e, file=sys.stderr)
+            raise
 
         # Subir imagen generada
         with open(tmp_img, 'rb') as f_img:

@@ -22,10 +22,10 @@ def validate(obj):
     return True
 
 
-def to_ir(obj):
+def to_ir(obj, graph_type='flowchart'):
     nodes = []
     edges = []
-    
+
     def recurse(o, parent_id=None):
         if isinstance(o, dict):
             for key, val in o.items():
@@ -44,6 +44,19 @@ def to_ir(obj):
             leaf_id = f"{parent_id}_val"
             nodes.append({'id': leaf_id, 'label': str(o)})
             edges.append({'from': parent_id, 'to': leaf_id})
-
     recurse(obj)
+
+    if graph_type == 'sequenceDiagram':
+        # Transform nodes/edges for sequence diagram specifics
+        nodes = [{'id': n['id'], 'label': f"participant {n['label']}"} for n in nodes]
+    elif graph_type == 'classDiagram':
+        # Transform nodes/edges for class diagram specifics
+        nodes = [{'id': n['id'], 'label': f"class {n['label']}"} for n in nodes]
+    elif graph_type == 'stateDiagram':
+        # Transform nodes/edges for state diagram specifics
+        nodes = [{'id': n['id'], 'label': f"state {n['label']}"} for n in nodes]
+    elif graph_type == 'erDiagram':
+        # Transform nodes/edges for ER diagram specifics
+        nodes = [{'id': n['id'], 'label': f"entity {n['label']}"} for n in nodes]
+
     return {'nodes': nodes, 'edges': edges}
