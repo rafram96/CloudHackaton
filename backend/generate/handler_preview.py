@@ -28,6 +28,10 @@ def lambda_handler(event, context):
         if dtype != 'json':
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Tipo no soportado en preview'})}
 
+        # Validar que 'code' sea un JSON válido
+        if not isinstance(code, (str, dict)):
+            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': "El campo 'code' debe ser un JSON válido o una cadena JSON."})}
+
         # Parseo y validación
         obj = load(code)
         validate(obj)
