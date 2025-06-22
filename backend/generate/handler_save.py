@@ -7,6 +7,7 @@ from datetime import datetime
 import boto3
 
 from parser_json import load, validate, to_ir
+from auth_utils import validate_token
 
 # Configuración AWS
 dynamodb = boto3.resource('dynamodb')
@@ -17,7 +18,6 @@ BUCKET = os.environ['BUCKET']
 
 # Asegurar que /opt/nodejs/.bin esté en PATH para poder ejecutar mmdc
 os.environ['PATH'] += os.pathsep + '/opt/nodejs/node_modules/.bin'
-
 HEADERS = {'Access-Control-Allow-Origin': '*'}
 
 def lambda_handler(event, context):
