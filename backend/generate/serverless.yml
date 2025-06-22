@@ -64,6 +64,18 @@ functions:
           method: post
           cors: true
 
+  save-frontend:
+    handler: handler_save_frontend.lambda_handler
+    package:
+      include:
+        - handler_save_frontend.py
+        - auth_utils.py
+    events:
+      - http:
+          path: /generate/save-frontend
+          method: post
+          cors: true
+
 resources:
   Resources:
     # Tabla de Digramas

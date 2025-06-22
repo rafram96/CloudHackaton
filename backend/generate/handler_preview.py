@@ -19,7 +19,7 @@ def lambda_handler(event, context):
         input_type = body.get('type', '').lower()
         # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
         diagram_type = body.get('diagram', '')
-        valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram']
+        valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram']
         if diagram_type not in valid:
             diagram_type = 'flowchart'
         fmt = body.get('format', 'svg')

@@ -26,8 +26,11 @@ def lambda_handler(event, context):
     code = body.get('code', '')
     dtype = body.get('type', '').lower()
     fmt = body.get('format', 'svg')
-    token = body.get('token', '')
-    diagram_type = body.get('diagram', '').lower()
+    token = body.get('token', '')    # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
+    diagram_type = body.get('diagram', '')
+    valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram']
+    if diagram_type not in valid:
+        diagram_type = 'flowchart'
 
     try:
         # Validar token y obtener user_id
@@ -39,15 +42,6 @@ def lambda_handler(event, context):
         # Parseo y generación de IR
         obj = load(code)
         validate(obj)
-        # Mapear los valores cortos del frontend a los nombres esperados por el parser
-        diagram_type_map = {
-            'flowchart': 'flowchart',
-            'sequence': 'sequenceDiagram',
-            'class': 'classDiagram',
-            'state': 'stateDiagram',
-            'er': 'erDiagram',
-        }
-        diagram_type = diagram_type_map.get(diagram_type, 'flowchart')
         mermaid_code = to_ir(obj, diagram_type)
 
         # Generar diagram_id y nombres de archivo con timestamp

@@ -31,12 +31,12 @@ Cada diagrama y su código fuente correspondiente se almacenan en Amazon S3, org
 - **Generación**: botón “Generar diagrama” que envía el código al backend.
 - **Visualización**: muestra el diagrama tras la generación (SVG/PNG).
 - **Exportación**: descarga en PNG, SVG o PDF.
-- **Selector**: tipo de diagrama (AWS, ER, JSON).
+- **Selector**: tipo de diagrama (AWS, JSON).
 
 ### ⚡ Backend (API REST)
 - **Endpoints protegidos** por token (JWT generado al login).
 - **Validación** del formato y contenido del código recibido.
-- **Generación** de diagramas usando Diagrams, ERAlchemy, json2graph, Mermaid, etc.
+- **Generación** de diagramas usando Diagrams, json2graph, Mermaid, etc.
 - **Almacenamiento**: guarda diagrama e input en S3 con identificador único por usuario.
 - **Respuesta**: retorna imagen (PNG o SVG) al frontend.
 - **Gestión de errores**: respuestas 400/500 con mensajes claros.

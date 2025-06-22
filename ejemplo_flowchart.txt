@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    {"id": "inicio", "label": "Inicio del Proceso"},
+    {"id": "validar", "label": "Validar Datos"},
+    {"id": "procesar", "label": "Procesar Información"},
+    {"id": "decision", "label": "¿Datos Válidos?"},
+    {"id": "error", "label": "Mostrar Error"},
+    {"id": "fin", "label": "Fin del Proceso"}
+  ],
+  "edges": [
+    {"from": "inicio", "to": "validar"},
+    {"from": "validar", "to": "decision"},
+    {"from": "decision", "to": "procesar", "label": "Sí"},
+    {"from": "decision", "to": "error", "label": "No"},
+    {"from": "procesar", "to": "fin"},
+    {"from": "error", "to": "validar", "label": "Reintentar"}
+  ]
+}

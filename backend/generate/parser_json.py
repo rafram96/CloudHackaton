@@ -44,8 +44,6 @@ def to_ir(obj, graph_type='flowchart'):
         return generate_sequence_diagram(obj)
     elif graph_type == 'stateDiagram':
         return generate_state_diagram(obj)
-    elif graph_type == 'erDiagram':
-        return generate_er_diagram(obj)
     return generate_flowchart(obj)
 
 
@@ -133,36 +131,6 @@ def generate_state_diagram(obj):
 
     return '\n'.join(lines)
 
-
-def generate_er_diagram(obj):
-    """
-    Convierte un JSON de entrada en código Mermaid para un erDiagram.
-    """
-    if not isinstance(obj, dict):
-        raise ValueError("Formato inválido para erDiagram: se esperaba un objeto JSON.")
-    if 'entities' not in obj:
-        raise ValueError("Formato inválido para erDiagram: falta el campo 'entities'.")
-    if 'relationships' not in obj:
-        raise ValueError("Formato inválido para erDiagram: falta el campo 'relationships'.")
-
-    entities = obj['entities']
-    relationships = obj['relationships']
-    lines = ['erDiagram']
-
-    for entity in entities:
-        if 'name' not in entity:
-            raise ValueError("Formato inválido para erDiagram: cada entidad debe tener un 'name'.")
-        lines.append(f'{entity["name"]} {{')
-        for attr in entity.get('attributes', []):
-            lines.append(f'    {attr}')
-        lines.append('}')
-
-    for relationship in relationships:
-        if 'from' not in relationship or 'to' not in relationship or 'type' not in relationship:
-            raise ValueError("Formato inválido para erDiagram: cada relación debe tener 'from', 'to' y 'type'.")
-        lines.append(f'{relationship["from"]} {relationship["type"]} {relationship["to"]}')
-
-    return '\n'.join(lines)
 
 
 def generate_flowchart(obj):

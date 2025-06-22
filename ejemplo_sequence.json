@@ -1,0 +1,13 @@
+{
+  "participants": ["Cliente", "WebApp", "API", "Database", "EmailService"],
+  "messages": [
+    {"from": "Cliente", "to": "WebApp", "text": "Solicitar registro"},
+    {"from": "WebApp", "to": "API", "text": "POST /register"},
+    {"from": "API", "to": "Database", "text": "Guardar usuario"},
+    {"from": "Database", "to": "API", "text": "Usuario guardado"},
+    {"from": "API", "to": "EmailService", "text": "Enviar email confirmación"},
+    {"from": "EmailService", "to": "API", "text": "Email enviado"},
+    {"from": "API", "to": "WebApp", "text": "Registro exitoso"},
+    {"from": "WebApp", "to": "Cliente", "text": "Mostrar confirmación"}
+  ]
+}
