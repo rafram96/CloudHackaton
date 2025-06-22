@@ -25,7 +25,7 @@ provider:
     TOKENS_TABLE: h_tokens_access
     DIAGRAMS_TABLE: h_diagrams
     BUCKET: diagramas-hackacloud-${self:provider.stage}
-    JWT_SECRET: mi-secreto-super-seguro-hackacloud  # Secreto para firmar tokens JWT
+    JWT_SECRET: mi-secreto-super-seguro-hackacloud 
 
 
 functions:

@@ -8,6 +8,148 @@ import html2canvas from 'html2canvas';
 const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'https://<tu-auth-endpoint>.amazonaws.com/dev';
 const GENERATE_URL = import.meta.env.VITE_GENERATE_URL || 'https://<tu-generate-endpoint>.amazonaws.com/dev';
 
+// Componente SignIn - fuera del componente principal para evitar re-renders
+const SignIn = ({ 
+  activeTheme, 
+  themes, 
+  currentTheme, 
+  changeTheme, 
+  handleLogin, 
+  userId, 
+  setUserId, 
+  password, 
+  setPassword, 
+  authError, 
+  setIsRegistering 
+}) => (
+  <div className="auth-form">
+    <div className="auth-header">
+      <h2>{activeTheme.name} ACCESO AL SISTEMA</h2>
+      <p>Identifícate para acceder</p>
+    </div>
+    <form onSubmit={handleLogin}>
+      <div className="input-group">
+        <label>{activeTheme.userIcon} Identificación</label>
+        <input
+          type="text"
+          placeholder={`Usuario ${activeTheme.name}`}
+          value={userId}
+          onChange={e => setUserId(e.target.value)}
+          required
+        />
+      </div>
+      <div className="input-group">
+        <label>🔒 Clave de Acceso</label>
+        <input
+          type="password"
+          placeholder="Contraseña secreta"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      {authError && <div className="error-message">❌ {authError}</div>}
+      <button type="submit" className="btn-primary">
+        🚀 ACCEDER AL SISTEMA
+      </button>
+      <p className="switch-text">
+        ¿No tienes acceso?{' '}
+        <button type="button" className="link-btn" onClick={() => setIsRegistering(true)}>
+          Solicita autorización
+        </button>
+      </p>
+    </form>
+    
+    {/* Selector de tema en login */}
+    <div className="theme-selector">
+      <label>🎨 Elige tu tema:</label>
+      <div className="theme-options">
+        {Object.entries(themes).map(([key, theme]) => (
+          <button
+            key={key}
+            type="button"
+            className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
+            onClick={() => changeTheme(key)}
+          >
+            {theme.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// Componente SignUp - fuera del componente principal para evitar re-renders
+const SignUp = ({ 
+  activeTheme, 
+  themes, 
+  currentTheme, 
+  changeTheme, 
+  handleRegister, 
+  userId, 
+  setUserId, 
+  password, 
+  setPassword, 
+  authError, 
+  setIsRegistering 
+}) => (
+  <div className="auth-form">
+    <div className="auth-header">
+      <h2>{activeTheme.name} REGISTRO</h2>
+      <p>Únete al equipo</p>
+    </div>
+    <form onSubmit={handleRegister}>
+      <div className="input-group">
+        <label>{activeTheme.userIcon} Nombre del Héroe</label>
+        <input
+          type="text"
+          placeholder="Tu nombre de héroe"
+          value={userId}
+          onChange={e => setUserId(e.target.value)}
+          required
+        />
+      </div>
+      <div className="input-group">
+        <label>🔐 Código Secreto</label>
+        <input
+          type="password"
+          placeholder="Contraseña ultra secreta"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
+      </div>
+      {authError && <div className="error-message">❌ {authError}</div>}
+      <button type="submit" className="btn-primary">
+        ⚡ REGISTRAR HÉROE
+      </button>
+      <p className="switch-text">
+        ¿Ya tienes acceso?{' '}
+        <button type="button" className="link-btn" onClick={() => setIsRegistering(false)}>
+          Iniciar sesión
+        </button>
+      </p>
+    </form>
+
+    {/* Selector de tema en registro también */}
+    <div className="theme-selector">
+      <label>🎨 Elige tu tema:</label>
+      <div className="theme-options">
+        {Object.entries(themes).map(([key, theme]) => (
+          <button
+            key={key}
+            type="button"
+            className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
+            onClick={() => changeTheme(key)}
+          >
+            {theme.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default function App() {
   // Estado de autenticación
   const [userId, setUserId] = useState('');
@@ -27,7 +169,8 @@ export default function App() {
   const [saveFormat, setSaveFormat] = useState('svg');
   const [isDragOver, setIsDragOver] = useState(false);
   const [showDropModal, setShowDropModal] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true); // Batman siempre en modo oscuro
   const [currentTheme, setCurrentTheme] = useState(() => {
     return localStorage.getItem('selectedTheme') || 'batman';
@@ -57,8 +200,7 @@ export default function App() {
           {"from": "Batcomputer", "to": "Batman", "text": "Location found"},
           {"from": "Batman", "to": "Criminal", "text": "Justice served"}
         ]
-      },
-      classDiagram: {
+      },      classDiagram: {
         "classes": [
           {
             "name": "Hero",
@@ -71,6 +213,43 @@ export default function App() {
             "methods": ["glide()", "stealth()", "analyze()"],
             "extends": "Hero"
           }
+        ]
+      },      stateDiagram: {
+        "states": [
+          {
+            "id": "idle",
+            "label": "🦇 En la Cueva",
+            "type": "state"
+          },
+          {
+            "id": "alert",
+            "label": "🚨 Alerta Activada",
+            "type": "state"
+          },
+          {
+            "id": "investigating",
+            "label": "🔍 Investigando",
+            "type": "state"
+          },
+          {
+            "id": "combat",
+            "label": "⚔️ En Combate",
+            "type": "state"
+          },
+          {
+            "id": "victory",
+            "label": "🏆 Misión Completada",
+            "type": "state"
+          }
+        ],
+        "transitions": [
+          {"from": "idle", "to": "alert", "text": "Bat-Signal"},
+          {"from": "alert", "to": "investigating", "text": "analizar amenaza"},
+          {"from": "investigating", "to": "combat", "text": "encontrar criminal"},
+          {"from": "combat", "to": "victory", "text": "derrotar enemigo"},
+          {"from": "victory", "to": "idle", "text": "regresar a casa"},
+          {"from": "investigating", "to": "idle", "text": "falsa alarma"},
+          {"from": "combat", "to": "alert", "text": "escape del criminal"}
         ]
       }
     },
@@ -172,10 +351,9 @@ export default function App() {
       }
     }
   };
-
   const activeTheme = themes[currentTheme];
-
-  // Referencia y ID único para render Mermaid
+  
+  // Referencias para Mermaid
   const svgRef = useRef(null);
   const mermaidId = useMemo(() => `mmd-${Math.random().toString(36).substr(2,9)}`, []);
 
@@ -218,12 +396,16 @@ export default function App() {
     } catch (err) {
       setAuthError(err.message);
     }
-  }
-  // Funciones de diagrama
+  }  // Funciones de diagrama con mejor diagnóstico
   async function handlePreview() {
     setError('');
     setDiagram('');
     setIsLoading(true);
+    
+    console.log('=== INICIANDO PREVIEW ===');
+    console.log('Tipo de entrada:', inputType);
+    console.log('Tipo de diagrama:', graphType);
+    console.log('Código:', code);
     
     try {
       // Validar que tenemos token
@@ -234,11 +416,22 @@ export default function App() {
       // Validar JSON antes de enviar (solo para tipo JSON)
       if (inputType === 'json') {
         try {
-          JSON.parse(code);
+          const parsedCode = JSON.parse(code);
+          console.log('JSON parseado correctamente:', parsedCode);
         } catch (parseError) {
-          throw new Error('El código no es un JSON válido. Verifica la sintaxis.');
+          console.error('Error parseando JSON:', parseError);
+          throw new Error(`El código no es un JSON válido: ${parseError.message}`);
         }
       }
+
+      console.log('Enviando request al backend...');
+      const requestBody = { 
+        code, 
+        type: inputType, 
+        format: 'svg', 
+        diagram: graphType 
+      };
+      console.log('Request body:', requestBody);
 
       const res = await fetch(`${GENERATE_URL}/generate/preview`, {
         method: 'POST',
@@ -246,19 +439,27 @@ export default function App() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token.trim()}`
         },
-        body: JSON.stringify({ code, type: inputType, format: 'svg', diagram: graphType })
+        body: JSON.stringify(requestBody)
       });
       
+      console.log('Response status:', res.status);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
+      console.log('Response data:', data);
+      
+      if (!res.ok) {
+        throw new Error(data.error || `Error ${res.status}: ${res.statusText}`);
+      }
+      
+      console.log('Diagrama recibido del backend:', data.diagram);
       setDiagram(data.diagram);
     } catch (err) {
-      setError(err.message);
-      console.error('Preview error:', err);
+      console.error('=== ERROR EN PREVIEW ===');
+      console.error('Error completo:', err);
+      setError(`❌ ${err.message}`);
     } finally {
       setIsLoading(false);
     }
-  }  async function handleSaveFromPreview() {
+  }async function handleSaveFromPreview() {
     if (!svgRef.current || !diagram) {
       setError('No hay preview para guardar');
       return;
@@ -454,9 +655,10 @@ Ejemplo:
   ]
 }`;
     }
-  }
-  // Función para exportar SVG a PDF
+  }  // Función para exportar SVG a PDF (método más simple y confiable)
   async function exportSvgToPDF() {
+    console.log('Iniciando exportación PDF...');
+    
     if (!svgRef.current) {
       setError('No hay diagrama para exportar');
       return;
@@ -465,56 +667,215 @@ Ejemplo:
     setIsLoading(true);
     try {
       const svgElement = svgRef.current.querySelector('svg');
+      
       if (!svgElement) {
-        setError('No se encontró elemento SVG');
+        setError('No se encontró elemento SVG para exportar');
         setIsLoading(false);
         return;
       }
 
-      // Crear canvas desde SVG
-      const canvas = await html2canvas(svgElement, {
-        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
-        scale: 2
+      // Crear PDF simple con información del diagrama
+      const pdf = new jsPDF();
+      
+      // Agregar encabezado
+      pdf.setFontSize(20);
+      pdf.setTextColor(40, 40, 40);
+      const title = `🦇 Diagrama ${graphType.charAt(0).toUpperCase() + graphType.slice(1)}`;
+      pdf.text(title, 20, 30);
+      
+      // Agregar información
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(`Generado: ${new Date().toLocaleString()}`, 20, 50);
+      pdf.text(`Tipo: ${inputType.toUpperCase()}`, 20, 65);
+      pdf.text(`Formato: ${saveFormat.toUpperCase()}`, 20, 80);
+      
+      // Línea separadora
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(20, 90, 190, 90);
+      
+      // Agregar código fuente
+      pdf.setFontSize(10);
+      pdf.setTextColor(60, 60, 60);
+      pdf.text('Código fuente del diagrama:', 20, 110);
+      
+      // Procesar código línea por línea
+      const codeLines = code.split('\n');
+      let yPos = 125;
+      pdf.setFontSize(9);
+      pdf.setTextColor(40, 40, 40);
+      
+      codeLines.forEach((line, index) => {
+        if (yPos > 280) { // Nueva página si es necesario
+          pdf.addPage();
+          yPos = 30;
+        }
+        // Limitar longitud de línea para que quepa en la página
+        const maxLineLength = 85;
+        if (line.length > maxLineLength) {
+          const wrappedLines = [];
+          for (let i = 0; i < line.length; i += maxLineLength) {
+            wrappedLines.push(line.substring(i, i + maxLineLength));
+          }
+          wrappedLines.forEach((wrappedLine, wrapIndex) => {
+            pdf.text(wrappedLine, 20, yPos);
+            yPos += 12;
+          });
+        } else {
+          pdf.text(line || ' ', 20, yPos);
+          yPos += 12;
+        }
+      });
+      
+      // Nota sobre visualización
+      pdf.addPage();
+      pdf.setFontSize(14);
+      pdf.setTextColor(40, 40, 40);
+      pdf.text('📊 Sobre la Visualización', 20, 30);
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(60, 60, 60);
+      const noteText = [
+        'Este PDF contiene el código fuente del diagrama.',
+        'Para ver la representación visual completa:',
+        '',
+        '1. Use la función "Exportar SVG" en la aplicación',
+        '2. O acceda a la URL guardada en el servidor',
+        '',
+        'El diagrama fue generado usando Mermaid.js',
+        'y se muestra en tiempo real en la interfaz web.'
+      ];
+      
+      let noteY = 50;
+      noteText.forEach(line => {
+        pdf.text(line, 20, noteY);
+        noteY += 15;
       });
 
-      // Crear PDF
-      const pdf = new jsPDF();
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 10, 10, imgWidth, imgHeight);
-      
       const fileName = `diagrama_${graphType}_${Date.now()}.pdf`;
       pdf.save(fileName);
+      
+      setError('✅ PDF exportado exitosamente con código fuente');
+      console.log('PDF exportado exitosamente');
+      
     } catch (err) {
-      setError(`Error exportando PDF: ${err.message}`);
+      console.error('Error en exportación PDF:', err);
+      setError(`⚠️ Error exportando PDF: ${err.message}. Usa 'Exportar SVG' como alternativa.`);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  // Función alternativa para exportar SVG directo
+  function exportSvgDirect() {
+    if (!svgRef.current) {
+      setError('No hay diagrama para exportar');
+      return;
+    }
+
+    try {
+      const svgElement = svgRef.current.querySelector('svg');
+      if (!svgElement) {
+        setError('No se encontró elemento SVG');
+        return;
+      }
+
+      // Obtener el SVG como string
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      
+      // Crear URL para descarga
+      const url = URL.createObjectURL(svgBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `diagrama_${graphType}_${Date.now()}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      setError(''); // Limpiar errores
+    } catch (err) {
+      setError(`Error exportando SVG: ${err.message}`);
     }
   }
 
   // Función para toggle del modo oscuro
   function toggleDarkMode() {
     setIsDarkMode(!isDarkMode);
-  }
-
-  // Integrar mermaid
+  }  // Integrar mermaid con mejor manejo de errores
   useEffect(() => {
     if (diagram && svgRef.current) {
+      console.log('Iniciando renderización de Mermaid...');
+      console.log('Diagrama recibido:', diagram);
+      console.log('Tipo de diagrama:', graphType);
+      
       mermaid.initialize({ 
         startOnLoad: false,
-        theme: isDarkMode ? 'dark' : 'default'
+        theme: isDarkMode ? 'dark' : 'default',
+        securityLevel: 'loose',
+        fontFamily: 'Arial, sans-serif'
       });
+      
+      // Limpiar contenido previo
+      svgRef.current.innerHTML = '';
+      
       mermaid.render(mermaidId, diagram)
         .then(({ svg }) => { 
+          console.log('Mermaid renderizado exitosamente');
           svgRef.current.innerHTML = svg; 
+          setError(''); // Limpiar errores previos
         })
         .catch(err => {
           console.error('Mermaid render error:', err);
-          setError('Error renderizando diagrama');
+          console.error('Diagrama que causó el error:', diagram);
+          
+          // Mostrar error más detallado
+          let errorMessage = 'Error renderizando diagrama';
+          if (err.message) {
+            errorMessage += `: ${err.message}`;
+          }
+          
+          // Agregar sugerencias según el tipo de error
+          if (err.message && err.message.includes('Parse error')) {
+            errorMessage += '. Verifica la sintaxis del código JSON.';
+          } else if (err.message && err.message.includes('syntax')) {
+            errorMessage += '. Error de sintaxis en el diagrama generado.';
+          }
+          
+          setError(errorMessage);
+          
+          // Mostrar información de diagnóstico en el contenedor
+          svgRef.current.innerHTML = `
+            <div style="
+              padding: 20px; 
+              background: rgba(255, 0, 0, 0.1); 
+              border: 2px dashed #ff6b6b; 
+              border-radius: 8px; 
+              color: #fff; 
+              text-align: center;
+              font-family: Arial, sans-serif;
+            ">
+              <h3>❌ Error de Renderización</h3>
+              <p><strong>Tipo:</strong> ${graphType}</p>
+              <p><strong>Error:</strong> ${err.message || 'Error desconocido'}</p>
+              <p><strong>Sugerencia:</strong> Verifica que el código JSON sea válido y compatible con el tipo de diagrama seleccionado.</p>
+              <details style="margin-top: 15px; text-align: left;">
+                <summary style="cursor: pointer; color: #ffeb3b;">Ver código generado</summary>
+                <pre style="
+                  background: rgba(0,0,0,0.3); 
+                  padding: 10px; 
+                  border-radius: 4px; 
+                  overflow: auto; 
+                  max-height: 200px;
+                  font-size: 12px;
+                ">${diagram}</pre>
+              </details>
+            </div>
+          `;
         });
     }
-  }, [diagram, mermaidId, isDarkMode]);
+  }, [diagram, mermaidId, isDarkMode, graphType]);
 
   // Cerrar modal con tecla Escape
   useEffect(() => {
@@ -560,123 +921,8 @@ Ejemplo:
     }
     
     setDiagram('');
-    setError('');
-  }, [inputType]);  // Componente SignIn integrado
-  const SignIn = () => (
-    <div className="auth-form">
-      <div className="auth-header">
-        <h2>{activeTheme.name} ACCESO AL SISTEMA</h2>
-        <p>Identifícate para acceder</p>
-      </div>
-      <form onSubmit={handleLogin}>
-        <div className="input-group">
-          <label>{activeTheme.userIcon} Identificación</label>
-          <input
-            type="text"
-            placeholder={`Usuario ${activeTheme.name}`}
-            value={userId}
-            onChange={e => setUserId(e.target.value)}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label>🔒 Clave de Acceso</label>
-          <input
-            type="password"
-            placeholder="Contraseña secreta"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {authError && <div className="error-message">❌ {authError}</div>}
-        <button type="submit" className="btn-primary">
-          🚀 ACCEDER AL SISTEMA
-        </button>
-        <p className="switch-text">
-          ¿No tienes acceso?{' '}
-          <button type="button" className="link-btn" onClick={() => setIsRegistering(true)}>
-            Solicita autorización
-          </button>
-        </p>
-      </form>
-      
-      {/* Selector de tema en login */}
-      <div className="theme-selector">
-        <label>🎨 Elige tu tema:</label>
-        <div className="theme-options">
-          {Object.entries(themes).map(([key, theme]) => (
-            <button
-              key={key}
-              type="button"
-              className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
-              onClick={() => changeTheme(key)}
-            >
-              {theme.name}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-  // Componente SignUp integrado
-  const SignUp = () => (
-    <div className="auth-form">
-      <div className="auth-header">
-        <h2>{activeTheme.name} REGISTRO</h2>
-        <p>Únete al equipo</p>
-      </div>
-      <form onSubmit={handleRegister}>
-        <div className="input-group">
-          <label>{activeTheme.userIcon} Nombre del Héroe</label>
-          <input
-            type="text"
-            placeholder="Tu nombre de héroe"
-            value={userId}
-            onChange={e => setUserId(e.target.value)}
-            required
-          />
-        </div>
-        <div className="input-group">
-          <label>🔐 Código Secreto</label>
-          <input
-            type="password"
-            placeholder="Contraseña ultra secreta"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {authError && <div className="error-message">❌ {authError}</div>}
-        <button type="submit" className="btn-primary">
-          ⚡ REGISTRAR HÉROE
-        </button>
-        <p className="switch-text">
-          ¿Ya tienes acceso?{' '}
-          <button type="button" className="link-btn" onClick={() => setIsRegistering(false)}>
-            Iniciar sesión
-          </button>
-        </p>
-      </form>
-
-      {/* Selector de tema en registro también */}
-      <div className="theme-selector">
-        <label>🎨 Elige tu tema:</label>
-        <div className="theme-options">
-          {Object.entries(themes).map(([key, theme]) => (
-            <button
-              key={key}
-              type="button"
-              className={`theme-btn ${currentTheme === key ? 'active' : ''}`}
-              onClick={() => changeTheme(key)}
-            >
-              {theme.name}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+    setError('');  }, [inputType]);
+  
   if (!token) {
     return (
       <div className={`auth-container theme-${currentTheme}`}>
@@ -684,7 +930,34 @@ Ejemplo:
           <div className="theme-symbol">{activeTheme.name.split(' ')[0]}</div>
         </div>
         <div className="auth-content">
-          {isRegistering ? <SignUp /> : <SignIn />}
+          {isRegistering ? 
+            <SignUp 
+              activeTheme={activeTheme}
+              themes={themes}
+              currentTheme={currentTheme}
+              changeTheme={changeTheme}
+              handleRegister={handleRegister}
+              userId={userId}
+              setUserId={setUserId}
+              password={password}
+              setPassword={setPassword}
+              authError={authError}
+              setIsRegistering={setIsRegistering}
+            /> : 
+            <SignIn 
+              activeTheme={activeTheme}
+              themes={themes}
+              currentTheme={currentTheme}
+              changeTheme={changeTheme}
+              handleLogin={handleLogin}
+              userId={userId}
+              setUserId={setUserId}
+              password={password}
+              setPassword={setPassword}
+              authError={authError}
+              setIsRegistering={setIsRegistering}
+            />
+          }
           {registerMessage && (
             <div className="success-message">✅ {registerMessage}</div>
           )}
@@ -779,20 +1052,19 @@ Ejemplo:
                 📁 Cargar Archivo
               </button>
             </div>
-          </div>
-          
-          <div 
+          </div>          <div 
             className={`textarea-container ${isDragOver ? 'drag-over' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
             <textarea
-              className="code-input"
+              className="code-textarea"
               value={code}
-              onChange={e => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value)}
               placeholder={getPlaceholder()}
-              disabled={isLoading}
+              rows={20}
+              spellCheck={false}
             />
             {isDragOver && (
               <div className="drag-overlay">
@@ -813,27 +1085,35 @@ Ejemplo:
             </button>
             {error && <div className="error-message">⚠️ {error}</div>}
           </div>
-        </div>
-
-        {/* Panel de preview con temática Batman */}
+        </div>        {/* Panel de preview con temática Batman */}
         {diagram && (
           <div className="preview-panel">
             <div className="preview-header">
-              <h3>👁️ VISUALIZACIÓN</h3>
+              <h3>👁️ VISUALIZACIÓN DEL DIAGRAMA</h3>
               <div className="preview-actions">
                 <button 
                   onClick={exportSvgToPDF} 
                   className="btn-secondary"
                   disabled={isLoading}
+                  title="Exportar como archivo PDF"
                 >
-                  📄 Exportar PDF
+                  📄 PDF
+                </button>
+                <button 
+                  onClick={exportSvgDirect} 
+                  className="btn-secondary"
+                  disabled={isLoading}
+                  title="Exportar como archivo SVG"
+                >
+                  🎨 SVG
                 </button>
                 <button 
                   onClick={handleSaveFromPreview} 
                   className="btn-primary"
                   disabled={isLoading}
+                  title="Guardar en el servidor"
                 >
-                  {isLoading ? '⏳ Guardando...' : '💾 GUARDAR EN BAT-CUEVA'}
+                  {isLoading ? '⏳ Guardando...' : '💾 GUARDAR'}
                 </button>
               </div>
             </div>

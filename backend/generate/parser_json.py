@@ -121,9 +121,18 @@ def generate_state_diagram(obj):
     transitions = obj['transitions']
     lines = ['stateDiagram-v2']
 
+    # Generar estados con sintaxis correcta de Mermaid
     for state in states:
-        lines.append(f'state {state}')
+        if isinstance(state, dict):
+            state_id = state.get('id', 'unknown')
+            state_label = state.get('label', state_id)
+            # Sintaxis: state_id : label
+            lines.append(f'{state_id} : {state_label}')
+        else:
+            # Si el estado es solo un string, usarlo directamente
+            lines.append(f'{state}')
 
+    # Generar transiciones
     for transition in transitions:
         if 'from' not in transition or 'to' not in transition or 'text' not in transition:
             raise ValueError("Formato inválido para stateDiagram: cada transición debe tener 'from', 'to' y 'text'.")
