@@ -89,5 +89,3 @@ Fomentar el aprendizaje práctico y el trabajo colaborativo en Cloud Computing. 
 4. **Diagrama de arquitectura** de la solución.
 
 ---
-
-- Mover este archivo a `/docs/UTEC_Diagram_Project.md`
