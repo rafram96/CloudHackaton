@@ -22,8 +22,10 @@ def lambda_handler(event, context):
     if 'Item' not in resp:
         return {'statusCode': 401, 'body': json.dumps({'error': 'Token no válido'})}
 
-    expires = resp['Item'].get('expires')
-    user_id = resp['Item'].get('user_id')
+    item = resp['Item']
+    expires = item.get('expires')
+    user_id = item.get('user_id')
+    tenant_id = item.get('tenant_id')
     try:
         exp_time = datetime.fromisoformat(expires)
     except ValueError:
@@ -31,4 +33,4 @@ def lambda_handler(event, context):
 
     if datetime.utcnow() > exp_time:
         return {'statusCode': 401, 'body': json.dumps({'error': 'Token expirado'})}
-    return {'statusCode': 200, 'body': json.dumps({'message': 'Token válido', 'user_id': user_id})}
+    return {'statusCode': 200, 'body': json.dumps({'message': 'Token válido', 'user_id': user_id, 'tenant_id': tenant_id})}

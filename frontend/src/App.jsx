@@ -151,6 +151,13 @@ const SignUp = ({
 );
 
 export default function App() {
+  // Estado multitenancy
+  const [tenantId, setTenantId] = useState(
+    localStorage.getItem('tenantId') || ''
+  );
+  // Estado de historial de diagramas procesados
+  const [history, setHistory] = useState([]);
+
   // Estado de autenticación
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -372,16 +379,23 @@ export default function App() {
       const res = await fetch(`${AUTH_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, password })
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          user_id: userId,
+          password
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
       setToken(data.token);
+      // cargar historial tras login
+      fetchHistory(data.token);
     } catch (err) {
       setAuthError(err.message);
     }
   }
 
+  // Función para registro con tenantId
   async function handleRegister(e) {
     e.preventDefault();
     setAuthError('');
@@ -390,7 +404,11 @@ export default function App() {
       const res = await fetch(`${AUTH_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, password })
+        body: JSON.stringify({
+          tenant_id: tenantId,
+          user_id: userId,
+          password
+        })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Register failed');
@@ -441,7 +459,8 @@ export default function App() {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token.trim()}`
+          'Authorization': `Bearer ${token.trim()}`,
+          'X-Tenant-Id': tenantId
         },
         body: JSON.stringify(requestBody)
       });
@@ -504,9 +523,11 @@ export default function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token.trim()}`
+          'Authorization': `Bearer ${token.trim()}`,
+          'X-Tenant-Id': tenantId
         },
         body: JSON.stringify({
+          tenant_id: tenantId,
           image_base64: imageBase64,
           type: inputType,
           format: format,
@@ -810,7 +831,7 @@ Ejemplo:
   // Función para toggle del modo oscuro
   function toggleDarkMode() {
     setIsDarkMode(!isDarkMode);
-  }  // Integrar mermaid con mejor manejo de errores
+  }  // Integrar mermaid with mejor manejo de errores
   useEffect(() => {
     if (diagram && svgRef.current) {
       console.log('Iniciando renderización de Mermaid...');
@@ -932,6 +953,28 @@ Ejemplo:
     setDiagram('');
     setError('');
   }, [inputType]);
+
+  // Almacenar tenantId localmente
+  useEffect(() => {
+    localStorage.setItem('tenantId', tenantId);
+  }, [tenantId]);
+
+  // Función para recuperar historial
+  async function fetchHistory(token) {
+    try {
+      const res = await fetch(`${GENERATE_URL}/generate/history`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token || data?.token || ''}`,
+          'X-Tenant-Id': tenantId
+        }
+      });
+      if (res.ok) {
+        const arr = await res.json();
+        setHistory(arr);
+      }
+    } catch {}    
+  }
 
   if (!token) {
     return (
@@ -1184,6 +1227,24 @@ Ejemplo:
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Panel de historial de diagramas procesados */}
+      {token && (
+        <div className="history-panel">
+          <h3>📜 Historial de diagramas</h3>
+          <ul>
+            {history.map(item => (
+              <li key={item.diagram_id}>
+                <strong>{new Date(item.createdAt).toLocaleString()}</strong> – {item.diagram_type}
+                <button onClick={() => setCode(item.code)}>🔄 Cargar</button>
+                <button onClick={() => {
+                  setDiagramUrl(item.s3_url);
+                }}>👁️ Ver</button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

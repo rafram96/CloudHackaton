@@ -35,8 +35,12 @@ def lambda_handler(event, context):
         diagram_type = 'flowchart'
 
     try:
-        # Validar token y obtener user_id
-        user_id = validate_token(token)
+        # Validar token y obtener tenant_id y user_id
+        headers_in = event.get('headers', {})
+        header_tenant = headers_in.get('X-Tenant-Id') or headers_in.get('x-tenant-id')
+        tenant_id, user_id = validate_token(token)
+        if not header_tenant or header_tenant != tenant_id:
+            return {'statusCode': 403, 'headers': HEADERS, 'body': json.dumps({'error': 'Tenant no autorizado'})}
 
         if dtype not in ['json', 'aws', 'er']:
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': f'Tipo no soportado: {dtype}. Tipos válidos: json, aws, er'})}
@@ -46,10 +50,10 @@ def lambda_handler(event, context):
         validate(obj)
         mermaid_code = to_ir(obj, diagram_type)
 
-        # Generar diagram_id y nombres de archivo con timestamp
+        # Generar diagram_id y nombres de archivo con timestamp y multitenancy
         diagram_id = str(uuid.uuid4())
         now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
-        prefix = f"{user_id}/{diagram_id}/"
+        prefix = f"{tenant_id}/{user_id}/{diagram_id}/"
         source_key = prefix + f'source_{now_str}.txt'
         image_key = prefix + f'diagram_{now_str}.{fmt}'
 
@@ -85,11 +89,12 @@ def lambda_handler(event, context):
                 ACL='public-read'
             )
 
-        # Registrar metadatos en DynamoDB
+        # Registrar metadatos en DynamoDB con multitenancy
         table = dynamodb.Table(DIAGRAMS_TABLE)
         table.put_item(Item={
-            'owner_id': user_id,
+            'tenant_id': tenant_id,
             'diagram_id': diagram_id,
+            'owner_id': user_id,
             'type': dtype,
             'created_at': datetime.utcnow().isoformat(),
             'source_code_s3key': source_key,

@@ -33,8 +33,13 @@ def lambda_handler(event, context):
         if not token:
             return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Token vacío no válido'})}
 
-        # Autenticación y multitenancy
-        user_id = validate_token(token)# Solo aceptamos JSON, AWS y ER
+        # Autenticación y multitenancy: validar token y tenant
+        headers_in = event.get('headers', {})
+        header_tenant = headers_in.get('X-Tenant-Id') or headers_in.get('x-tenant-id')
+        tenant_id, user_id = validate_token(token)
+        if not header_tenant or header_tenant != tenant_id:
+            return {'statusCode': 403, 'headers': HEADERS, 'body': json.dumps({'error': 'Tenant no autorizado'})}
+        # Solo aceptamos JSON, AWS y ER
         if input_type not in ['json', 'aws', 'er']:
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': f'Tipo no soportado en preview: {input_type}. Tipos válidos: json, aws, er'})}
 

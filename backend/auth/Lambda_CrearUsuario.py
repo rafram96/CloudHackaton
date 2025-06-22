@@ -15,17 +15,18 @@ def hash_password(password):
 def lambda_handler(event, context):
     body = event.get('body', '{}')
     data = json.loads(body)
+    tenant_id = data.get('tenant_id')
     user_id = data.get('user_id')
     password = data.get('password')
 
-    if not user_id or not password:
-        return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Falta user_id o password'})}
+    if not tenant_id or not user_id or not password:
+        return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Falta tenant_id, user_id o password'})}
 
     hashed = hash_password(password)
     table = dynamodb.Table(USERS_TABLE)
     try:
-        # Almacenar usuario
-        table.put_item(Item={'user_id': user_id, 'hash_password': hashed})
+        # Almacenar usuario con multitenancy
+        table.put_item(Item={'tenant_id': tenant_id, 'user_id': user_id, 'hash_password': hashed})
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'message': 'Usuario registrado', 'user_id': user_id})}
     except Exception as e:
         return {'statusCode': 500, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}

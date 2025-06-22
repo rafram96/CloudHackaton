@@ -54,6 +54,18 @@ functions:
           method: post
           cors: true
 
+  history:
+    handler: handler_history.lambda_handler
+    package:
+      patterns:
+        - handler_history.py
+        - auth_utils.py
+    events:
+      - http:
+          path: /generate/history
+          method: get
+          cors: true
+
 resources:
   Resources:
     # Tabla de Digramas
@@ -62,12 +74,12 @@ resources:
       Properties:
         TableName: h_diagrams
         AttributeDefinitions:
-          - AttributeName: owner_id
+          - AttributeName: tenant_id
             AttributeType: S
           - AttributeName: diagram_id
             AttributeType: S
         KeySchema:
-          - AttributeName: owner_id
+          - AttributeName: tenant_id
             KeyType: HASH
           - AttributeName: diagram_id
             KeyType: RANGE

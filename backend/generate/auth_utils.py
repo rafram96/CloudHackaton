@@ -7,8 +7,8 @@ dynamodb = boto3.resource('dynamodb')
 TOKENS_TABLE = os.environ['TOKENS_TABLE']
 
 
-def validate_token(token: str) -> str:
-    """Valida el token y retorna el user_id, o lanza Exception"""
+def validate_token(token: str) -> tuple:
+    """Valida el token y retorna (tenant_id, user_id), o lanza Exception"""
     table = dynamodb.Table(TOKENS_TABLE)
     resp = table.get_item(Key={'token': token})
     if 'Item' not in resp:
@@ -20,4 +20,5 @@ def validate_token(token: str) -> str:
         raise Exception('Formato de fecha inválido en token')
     if datetime.utcnow() > exp_time:
         raise Exception('Token expirado')
-    return item['user_id']
+    # Retornar tenant_id y user_id
+    return item.get('tenant_id'), item.get('user_id')

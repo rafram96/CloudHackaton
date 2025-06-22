@@ -58,11 +58,15 @@ resources:
       Properties:
         TableName: h_users
         AttributeDefinitions:
+          - AttributeName: tenant_id
+            AttributeType: S
           - AttributeName: user_id
             AttributeType: S
         KeySchema:
-          - AttributeName: user_id
+          - AttributeName: tenant_id
             KeyType: HASH
+          - AttributeName: user_id
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
     
     # TABLA TOKENS
