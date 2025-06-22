@@ -16,6 +16,7 @@ TOKENS_TABLE = os.environ['TOKENS_TABLE']
 DIAGRAMS_TABLE = os.environ['DIAGRAMS_TABLE']
 BUCKET = os.environ['BUCKET']
 
+HEADERS = {'Access-Control-Allow-Origin': '*'}
 
 def lambda_handler(event, context):
     # Leer input
@@ -30,7 +31,7 @@ def lambda_handler(event, context):
         user_id = validate_token(token)
 
         if dtype != 'json':
-            return {'statusCode': 400, 'body': json.dumps({'error': 'Tipo no soportado'})}
+            return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Tipo no soportado'})}
 
         # Parseo y generación de IR
         obj = load(code)
@@ -83,8 +84,8 @@ def lambda_handler(event, context):
 
         # URL pública
         url = f"https://{BUCKET}.s3.amazonaws.com/{image_key}"
-        return {'statusCode': 200, 'body': json.dumps({'diagram_id': diagram_id, 'url': url})}
+        return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'diagram_id': diagram_id, 'url': url})}
 
     except Exception as e:
         # Error
-        return {'statusCode': 400, 'body': json.dumps({'error': str(e)})}
+        return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}
