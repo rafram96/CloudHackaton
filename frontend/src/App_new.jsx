@@ -3,7 +3,6 @@ import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import WelcomePanel from './components/WelcomePanel';
 import './index.css';
-import './main.css';
 import mermaid from 'mermaid';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -146,12 +145,13 @@ export default function App() {
   // Referencia y ID único para render Mermaid
   const svgRef = useRef(null);
   const mermaidId = useMemo(() => `mmd-${Math.random().toString(36).substr(2,9)}`, []);
+
   // Funciones de autenticación
   async function handleLogin(e) {
     e.preventDefault();
     setAuthError('');
     try {
-      const res = await fetch(`${AUTH_URL}/login`, {
+      const res = await fetch(`${AUTH_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, password })
@@ -169,7 +169,7 @@ export default function App() {
     setAuthError('');
     setRegisterMessage('');
     try {
-      const res = await fetch(`${AUTH_URL}/register`, {
+      const res = await fetch(`${AUTH_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, password })
@@ -182,22 +182,13 @@ export default function App() {
       setAuthError(err.message);
     }
   }
+
   // Funciones de diagrama
   async function handlePreview() {
     setError('');
     setDiagram('');
     setIsLoading(true);
-    
     try {
-      // Validar JSON antes de enviar (solo para tipo JSON)
-      if (inputType === 'json') {
-        try {
-          JSON.parse(code);
-        } catch (parseError) {
-          throw new Error('El código no es un JSON válido. Verifica la sintaxis.');
-        }
-      }
-
       const res = await fetch(`${GENERATE_URL}/generate/preview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -212,6 +203,7 @@ export default function App() {
       setIsLoading(false);
     }
   }
+
   async function handleSaveFromPreview() {
     if (!svgRef.current || !diagram) {
       setError('No hay preview para guardar');
@@ -224,7 +216,6 @@ export default function App() {
       const svgElement = svgRef.current.querySelector('svg');
       if (!svgElement) {
         setError('No se encontró elemento SVG');
-        setIsLoading(false);
         return;
       }
 
@@ -271,6 +262,7 @@ export default function App() {
       setIsLoading(false);
     }
   }
+
   function handleLogout() {
     setToken('');
     setUserId('');
@@ -280,12 +272,6 @@ export default function App() {
     setError('');
     setRegisterMessage('');
     setAuthError('');
-    setCode('{}');
-    setInputType('json');
-    setGraphType('flowchart');
-    setSaveFormat('svg');
-    setShowCode(false);
-    setIsLoading(false);
   }
 
   function loadExample() {
@@ -317,6 +303,7 @@ export default function App() {
     setShowDropModal(false);
     setIsDragOver(false);
   }
+
   async function handleFileUpload(files) {
     if (!files || files.length === 0) return;
     
@@ -331,20 +318,10 @@ export default function App() {
     
     try {
       const text = await file.text();
-      
-      // Validar que el contenido sea JSON válido si es tipo JSON
-      if (inputType === 'json') {
-        try {
-          JSON.parse(text);
-        } catch (parseError) {
-          throw new Error('El archivo no contiene JSON válido. Verifica la sintaxis.');
-        }
-      }
-      
       setCode(text);
       closeFileUploadModal();
     } catch (err) {
-      setError(`Error procesando el archivo: ${err.message}`);
+      setError('Error leyendo el archivo');
     } finally {
       setIsLoadingFile(false);
     }
@@ -404,6 +381,7 @@ Ejemplo:
 }`;
     }
   }
+
   // Función para exportar SVG a PDF
   async function exportSvgToPDF() {
     if (!svgRef.current) {
@@ -416,7 +394,6 @@ Ejemplo:
       const svgElement = svgRef.current.querySelector('svg');
       if (!svgElement) {
         setError('No se encontró elemento SVG');
-        setIsLoading(false);
         return;
       }
 
@@ -475,22 +452,14 @@ Ejemplo:
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showDropModal]);  // Efecto para aplicar modo oscuro y clase de app
+  }, [showDropModal]);
+
+  // Efecto para aplicar modo oscuro
   useEffect(() => {
-    if (token) {
-      document.body.classList.add('app-mode');
-      document.body.classList.toggle('dark-mode', isDarkMode);
-    } else {
-      document.body.classList.remove('app-mode');
-      // Solo remover dark-mode si no está en app-mode para mantener preferencia en auth
-      if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
-      }
-    }
+    document.body.classList.toggle('dark-mode', isDarkMode);
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-  }, [isDarkMode, token]);
+  }, [isDarkMode]);
+
   // Efecto para reinicializar cuando cambie el tipo de entrada
   useEffect(() => {
     // Resetear el tipo de diagrama para JSON
@@ -500,14 +469,8 @@ Ejemplo:
       setGraphType('flowchart'); // AWS y ER siempre usan flowchart
     }
     
-    // Cargar ejemplo del nuevo tipo automáticamente
-    const example = examples[inputType]?.[inputType === 'json' ? 'flowchart' : 'flowchart'];
-    if (example) {
-      setCode(JSON.stringify(example, null, 2));
-    } else {
-      setCode('{}');
-    }
-    
+    // Cargar ejemplo del nuevo tipo
+    setCode('{}');
     setDiagram('');
     setError('');
   }, [inputType]);

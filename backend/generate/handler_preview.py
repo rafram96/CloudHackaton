@@ -19,9 +19,6 @@ def lambda_handler(event, context):
         input_type = body.get('type', '').lower()
         # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
         diagram_type = body.get('diagram', '')
-        valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram']
-        if diagram_type not in valid:
-            diagram_type = 'flowchart'
         fmt = body.get('format', 'svg')
         token = body.get('token', '')
 
@@ -32,6 +29,17 @@ def lambda_handler(event, context):
 
         if not isinstance(code, (str, dict)):
             return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': "El campo 'code' debe ser un JSON válido o una cadena JSON."})}
+
+        # Determinar diagrama para JSON
+        if input_type == 'json':
+            # Validar tipo de diagrama Mermaid
+            valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram']
+            if diagram_type not in valid:
+                diagram_type = 'flowchart'  # por defecto
+        # Para ER y AWS aún no implementados, se ignora el diagram_type
+        else:
+            # Mantener diagram_type tal cual o asignar predeterminado
+            diagram_type = diagram_type or 'flowchart'  # para AWS y ER usará flowchart si no se especifica
 
         # Generar código Mermaid directamente desde el parser
         obj = load(code)
