@@ -17,9 +17,10 @@ def lambda_handler(event, context):
         body = json.loads(event.get('body', '{}'))
         code = body.get('code', '')
         input_type = body.get('type', '').lower()
-        # Obtener el tipo de diagrama de Mermaid, por defecto 'flowchart'
-        diagram_type = body.get('diagram', '').lower()
-        if diagram_type not in ['flowchart', 'sequence', 'class', 'state', 'er', 'gantt', 'pie', 'journey', 'requirement', 'git', 'mindmap', 'timeline', 'quadrant']:
+        # Obtener el tipo de diagrama de Mermaid en camelCase, por defecto 'flowchart'
+        diagram_type = body.get('diagram', '')
+        valid = ['flowchart', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram']
+        if diagram_type not in valid:
             diagram_type = 'flowchart'
         fmt = body.get('format', 'svg')
         token = body.get('token', '')
@@ -38,16 +39,7 @@ def lambda_handler(event, context):
         obj = load(code)
         validate(obj)
 
-        # Mapear los valores cortos del frontend a los nombres esperados por el parser
-        diagram_type_map = {
-            'flowchart': 'flowchart',
-            'sequence': 'sequenceDiagram',
-            'class': 'classDiagram',
-            'state': 'stateDiagram',
-            'er': 'erDiagram',
-            # Otros tipos pueden agregarse aquí si se implementan
-        }
-        diagram_type = diagram_type_map.get(diagram_type, 'flowchart')
+        # Generar código Mermaid directamente desde el parser
         mermaid_code = to_ir(obj, diagram_type)
 
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'diagram': mermaid_code})}
