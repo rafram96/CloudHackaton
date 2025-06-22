@@ -22,6 +22,17 @@ layers:
     path: layers/extraLibs
     compatibleRuntimes:
       - python3.13
+    package:
+      exclude:
+        - nodejs/node_modules/**/.bin/**
+        - nodejs/node_modules/**/*.{md,markdown}
+        - nodejs/node_modules/**/test/**
+        - nodejs/node_modules/**/__tests__/**
+        - nodejs/node_modules/**/docs/**
+        - nodejs/node_modules/**/examples/**
+        - nodejs/node_modules/**/scripts/**
+        - nodejs/node_modules/**/CHANGELOG*.*
+        - python/**/*
 
 functions:
   preview:
