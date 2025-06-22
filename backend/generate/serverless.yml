@@ -84,16 +84,4 @@ resources:
         OwnershipControls:
           Rules:
             - ObjectOwnership: BucketOwnerPreferred
-    
-    # Política del bucket para acceso público de lectura
-    DiagramsBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      Properties:
-        Bucket: !Ref DiagramsBucket
-        PolicyDocument:
-          Statement:
-            - Sid: PublicReadGetObject
-              Effect: Allow
-              Principal: "*"
-              Action: "s3:GetObject"
-              Resource: !Sub "${DiagramsBucket}/*"
+        AccessControl: PublicRead
