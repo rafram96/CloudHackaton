@@ -16,6 +16,12 @@ provider:
     DIAGRAMS_TABLE: h_diagrams
     BUCKET: diagramas-hackacloud-${self:provider.stage}
 
+layers:
+  extraLibs:
+    path: layers/extraLibs
+    compatibleRuntimes:
+      - python3.13
+
 functions:
   preview:
     handler: handler_preview.lambda_handler
@@ -24,6 +30,8 @@ functions:
         - handler_preview.py
         - parser_json.py
         - renderer.py
+    layers:
+      - { Ref: ExtraLibsLambdaLayer }
     events:
       - http:
           path: /generate/preview
@@ -37,6 +45,8 @@ functions:
         - handler_save.py
         - parser_json.py
         - renderer.py
+    layers:
+      - { Ref: ExtraLibsLambdaLayer }
     events:
       - http:
           path: /generate/save
