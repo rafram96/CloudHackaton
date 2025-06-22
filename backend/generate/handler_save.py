@@ -50,11 +50,12 @@ def lambda_handler(event, context):
         diagram_type = diagram_type_map.get(diagram_type, 'flowchart')
         mermaid_code = to_ir(obj, diagram_type)
 
-        # Generar diagram_id y nombres de archivo
+        # Generar diagram_id y nombres de archivo con timestamp
         diagram_id = str(uuid.uuid4())
+        now_str = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         prefix = f"{user_id}/{diagram_id}/"
-        source_key = prefix + 'source.txt'
-        image_key = prefix + f'diagram.{fmt}'
+        source_key = prefix + f'source_{now_str}.txt'
+        image_key = prefix + f'diagram_{now_str}.{fmt}'
 
         # Guardar código fuente en S3
         s3.put_object(
