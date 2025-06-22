@@ -17,22 +17,7 @@ provider:
     DIAGRAMS_TABLE: h_diagrams
     BUCKET: diagramas-hackacloud-${self:provider.stage}
 
-layers:
-  extraLibs:
-    path: layers/extraLibs
-    compatibleRuntimes:
-      - python3.13
-    package:
-      exclude:
-        - nodejs/node_modules/**/*.{md,markdown}
-        - nodejs/node_modules/**/test/**
-        - nodejs/node_modules/**/__tests__/**
-        - nodejs/node_modules/**/docs/**
-        - nodejs/node_modules/**/examples/**
-        - nodejs/node_modules/**/scripts/**
-        - nodejs/node_modules/**/CHANGELOG*.*
-        - python/**/*
-
+    
 functions:
   preview:
     handler: handler_preview.lambda_handler
@@ -41,26 +26,10 @@ functions:
         - handler_preview.py
         - parser_json.py
         - renderer.py
-    layers:
-      - { Ref: ExtraLibsLambdaLayer }
+        - auth_utils.py
     events:
       - http:
           path: /generate/preview
-          method: post
-          cors: true
-
-  save:
-    handler: handler_save.lambda_handler
-    package:
-      include:
-        - handler_save.py
-        - parser_json.py
-        - renderer.py
-    layers:
-      - { Ref: ExtraLibsLambdaLayer }
-    events:
-      - http:
-          path: /generate/save
           method: post
           cors: true
 
@@ -93,7 +62,8 @@ resources:
             KeyType: HASH
           - AttributeName: diagram_id
             KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST      # Bucket de Diagramas
+        BillingMode: PAY_PER_REQUEST 
+    # Bucket de Diagramas
     DiagramsBucket:
       Type: AWS::S3::Bucket
       Properties:
