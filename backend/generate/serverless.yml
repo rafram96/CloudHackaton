@@ -24,7 +24,6 @@ layers:
       - python3.13
     package:
       exclude:
-        - nodejs/node_modules/**/.bin/**
         - nodejs/node_modules/**/*.{md,markdown}
         - nodejs/node_modules/**/test/**
         - nodejs/node_modules/**/__tests__/**
