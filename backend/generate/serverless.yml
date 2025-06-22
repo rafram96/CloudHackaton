@@ -1,0 +1,69 @@
+org: rafaelram
+service: generate-service
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: python3.13
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::582232142172:role/LabRole
+  environment:
+    TOKENS_TABLE: h_tokens_access
+    DIAGRAMS_TABLE: h_diagrams
+    BUCKET: diagramas-hackacloud-${self:provider.stage}
+
+functions:
+  preview:
+    handler: handler_preview.lambda_handler
+    package:
+      include:
+        - handler_preview.py
+        - parser_json.py
+        - renderer.py
+    events:
+      - http:
+          path: /generate/preview
+          method: post
+          cors: true
+
+  save:
+    handler: handler_save.lambda_handler
+    package:
+      include:
+        - handler_save.py
+        - parser_json.py
+        - renderer.py
+    events:
+      - http:
+          path: /generate/save
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    # Tabla de Digramas
+    DiagramsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: h_diagrams
+        AttributeDefinitions:
+          - AttributeName: owner_id
+            AttributeType: S
+          - AttributeName: diagram_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: owner_id
+            KeyType: HASH
+          - AttributeName: diagram_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    # Bucket de Diagramas
+    DiagramsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BUCKET: diagramas-hackacloud-${self:provider.stage}

@@ -23,5 +23,4 @@
 - Partition Key: `token` (String)
 - Atributos:
   - `expires` (String, ISO 8601 timestamp)
-
 ---

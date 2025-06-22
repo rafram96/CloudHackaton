@@ -1,6 +1,9 @@
 org: rafaelram
 service: auth-service
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: python3.13

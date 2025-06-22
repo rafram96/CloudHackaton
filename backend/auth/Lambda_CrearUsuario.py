@@ -3,7 +3,8 @@ import boto3
 import json
 import hashlib
 
-# Crea cliente DynamoDB
+HEADERS = {'Access-Control-Allow-Origin': '*'}
+
 dynamodb = boto3.resource('dynamodb')
 USERS_TABLE = os.environ['USERS_TABLE']
 
@@ -12,20 +13,19 @@ def hash_password(password):
 
 
 def lambda_handler(event, context):
-    # Parsear body JSON
     body = event.get('body', '{}')
     data = json.loads(body)
     user_id = data.get('user_id')
     password = data.get('password')
 
     if not user_id or not password:
-        return {'statusCode': 400, 'body': json.dumps({'error': 'Falta user_id o password'})}
+        return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Falta user_id o password'})}
 
     hashed = hash_password(password)
     table = dynamodb.Table(USERS_TABLE)
     try:
         # Almacenar usuario
         table.put_item(Item={'user_id': user_id, 'hash_password': hashed})
-        return {'statusCode': 200, 'body': json.dumps({'message': 'Usuario registrado', 'user_id': user_id})}
+        return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'message': 'Usuario registrado', 'user_id': user_id})}
     except Exception as e:
-        return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+        return {'statusCode': 500, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}

@@ -3,12 +3,10 @@ import boto3
 import json
 from datetime import datetime
 
-# Configuración DynamoDB
 dynamodb = boto3.resource('dynamodb')
 TOKENS_TABLE = os.environ['TOKENS_TABLE']
 
 def lambda_handler(event, context):
-    # Parsear body JSON
     body = event.get('body', '{}')
     data = json.loads(body)
     token = data.get('token')
@@ -33,6 +31,4 @@ def lambda_handler(event, context):
 
     if datetime.utcnow() > exp_time:
         return {'statusCode': 401, 'body': json.dumps({'error': 'Token expirado'})}
-
-    # Respuesta exitosa con user_id
     return {'statusCode': 200, 'body': json.dumps({'message': 'Token válido', 'user_id': user_id})}

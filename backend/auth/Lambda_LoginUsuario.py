@@ -4,7 +4,8 @@ import boto3
 import hashlib
 import uuid
 from datetime import datetime, timedelta
-#
+
+HEADERS = {'Access-Control-Allow-Origin': '*'}
 dynamodb = boto3.resource('dynamodb')
 USERS_TABLE = os.environ['USERS_TABLE']
 TOKENS_TABLE = os.environ['TOKENS_TABLE']
@@ -14,20 +15,18 @@ def hash_password(password: str) -> str:
 
 
 def lambda_handler(event, context):
-    # Parsear body JSON
     body = event.get('body', '{}')
     data = json.loads(body)
     user_id = data.get('user_id')
     password = data.get('password')
     if not user_id or not password:
-        return {'statusCode': 400, 'body': json.dumps({'error': 'Falta user_id o password'})}
+        return {'statusCode': 400, 'headers': HEADERS, 'body': json.dumps({'error': 'Falta user_id o password'})}
 
     table_users = dynamodb.Table(USERS_TABLE)
     resp = table_users.get_item(Key={'user_id': user_id})
     stored_hash = resp.get('Item', {}).get('hash_password')
-    # Usuario no encontrado o password incorrecto
     if not stored_hash or hash_password(password) != stored_hash:
-        return {'statusCode': 401, 'body': json.dumps({'error': 'Usuario o contraseña incorrectos'})}
+        return {'statusCode': 401, 'headers': HEADERS, 'body': json.dumps({'error': 'Usuario o contraseña incorrectos'})}
 
     # Generar token y expiración
     token = str(uuid.uuid4())
@@ -37,6 +36,6 @@ def lambda_handler(event, context):
     try:
         table_tokens.put_item(Item={'token': token, 'user_id': user_id, 'expires': expires})
     except Exception as e:
-        return {'statusCode': 500, 'body': json.dumps({'error': str(e)})}
+        return {'statusCode': 500, 'headers': HEADERS, 'body': json.dumps({'error': str(e)})}
 
-    return {'statusCode': 200, 'body': json.dumps({'token': token})}
+    return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps({'token': token})}
