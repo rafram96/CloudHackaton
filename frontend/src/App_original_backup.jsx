@@ -201,8 +201,7 @@ export default function App() {
           {"from": "Batcomputer", "to": "Batman", "text": "Location found"},
           {"from": "Batman", "to": "Criminal", "text": "Justice served"}
         ]
-      },
-      classDiagram: {
+      },      classDiagram: {
         "classes": [
           {
             "name": "Hero",
@@ -216,8 +215,7 @@ export default function App() {
             "extends": "Hero"
           }
         ]
-      },
-      stateDiagram: {
+      },      stateDiagram: {
         "states": [
           {
             "id": "idle",
@@ -769,8 +767,7 @@ Ejemplo:
     }
   }
 
-  // Función alternativa para exportar SVG directo
-  function exportSvgDirect() {
+  // Función alternativa para exportar SVG directo  function exportSvgDirect() {
     if (!svgRef.current) {
       setSuccessMessage('');
       setError('No hay diagrama para exportar');

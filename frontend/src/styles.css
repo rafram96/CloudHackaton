@@ -272,24 +272,21 @@ body {
 
 /* ===== MENSAJES ===== */
 .error-message {
-  background: rgba(220, 20, 60, 0.2);
-  border: 1px solid #dc143c;
-  color: #ff6b6b;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  color: #c62828; /* rojo oscuro */
+  background-color: #ffebee;
+  border: 1px solid #c62828;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .success-message {
-  background: rgba(34, 139, 34, 0.2);
-  border: 1px solid #228b22;
-  color: #90ee90;
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 1rem;
-  text-align: center;
-  font-weight: bold;
+  color: #2e7d32; /* verde oscuro */
+  background-color: #e8f5e9;
+  border: 1px solid #2e7d32;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
 }
 
 .switch-text {
