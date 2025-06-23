@@ -500,8 +500,31 @@ body {
 
 .textarea-container {
   position: relative;
-  flex: 1;
-  margin-bottom: 1rem;
+  margin: 1rem 0;
+  background: linear-gradient(
+    135deg, 
+    var(--primary-color) 0%, 
+    var(--secondary-color) 50%, 
+    var(--primary-color) 100%
+  );
+  border-radius: 16px;
+  padding: 4px;
+}
+
+.textarea-container::before {
+  content: '< BAT-CODE EDITOR />';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--background-color);
+  color: var(--primary-color);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  z-index: 10;
+  text-shadow: 0 0 8px var(--primary-color);
 }
 
 .code-input {
@@ -612,46 +635,114 @@ body {
 }
 
 .mermaid-container {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 1.5rem;
+  width: 100%;
+  height: 800px;
+  border: 3px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, var(--background-color) 0%, var(--accent-color) 50%, var(--background-color) 100%);
+  box-shadow: 
+    inset 0 4px 12px rgba(0,0,0,0.4),
+    0 8px 24px rgba(0,0,0,0.3),
+    0 0 0 1px rgba(255, 215, 0, 0.1);
   margin-bottom: 1rem;
-  overflow: auto;
-  min-height: 400px;
-  max-height: 700px;
+  transition: all 0.3s ease;
+}
+
+.mermaid-container:hover {
+  box-shadow: 
+    inset 0 4px 12px rgba(0,0,0,0.4),
+    0 12px 32px rgba(0,0,0,0.4),
+    0 0 0 2px rgba(255, 215, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.mermaid-diagram {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 100%;
+  min-height: 100%;
+  text-align: center;
+}
+
+.mermaid-diagram svg {
+  max-width: none !important;
+  max-height: none !important;
+  width: auto !important;
+  height: auto !important;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+
+/* Controles de zoom */
+.diagram-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 100;
+  display: flex;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 6px;
+  padding: 3px;
+  backdrop-filter: blur(4px);
+}
+
+.btn-control {
+  background: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.mermaid-diagram {
-  text-align: center;
-  width: 100%;
-  height: 100%;
+.btn-control:hover {
+  background: var(--primary-color);
+  color: var(--background-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.mermaid-diagram svg {
-  max-width: 100%;
-  height: auto;
+.btn-control:active {
+  transform: translateY(0);
 }
 
-.diagram-url {
-  background: rgba(34, 139, 34, 0.2);
-  border: 1px solid #228b22;
-  border-radius: 6px;
-  padding: 1rem;
-  font-size: 0.9rem;
+/* Instrucciones de zoom */
+.zoom-instructions {
+  margin: 0.5rem 0;
 }
 
-.diagram-url a {
-  color: var(--primary-color);
-  text-decoration: none;
-  word-break: break-all;
+.zoom-instructions small {
+  color: var(--text-color);
+  opacity: 0.7;
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
-.diagram-url a:hover {
-  text-decoration: underline;
+/* Estilos para el transform wrapper */
+.react-transform-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-transform-component {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 /* ===== MODAL ===== */
@@ -848,25 +939,68 @@ body {
   font-weight: 500;
 }
 
-/* Textarea más grande */
+/* Textarea estilizada */
 .code-textarea {
-  min-height: 450px;
+  min-height: 500px;
   width: 100%;
-  font-family: 'Courier New', monospace;
+  font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace;
   font-size: 14px;
+  line-height: 1.6;
   border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 20px;
   resize: vertical;
-  background-color: var(--accent-color);
+  background: linear-gradient(135deg, var(--background-color) 0%, var(--accent-color) 100%);
   color: var(--text-color);
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 2px 8px rgba(0,0,0,0.3),
+    0 4px 16px rgba(0,0,0,0.2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--accent-color);
 }
 
 .code-textarea:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+  box-shadow: 
+    inset 0 2px 8px rgba(0,0,0,0.3),
+    0 4px 20px rgba(0,0,0,0.3),
+    0 0 0 3px rgba(255, 215, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.code-textarea::placeholder {
+  color: var(--text-color);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.code-textarea:focus::placeholder {
+  opacity: 0.3;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar webkit */
+.code-textarea::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.code-textarea::-webkit-scrollbar-track {
+  background: var(--accent-color);
+  border-radius: 6px;
+}
+
+.code-textarea::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+  border-radius: 6px;
+  border: 2px solid var(--accent-color);
+}
+
+.code-textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
 }
 
 /* ===== RESPONSIVE ===== */

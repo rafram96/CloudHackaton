@@ -3,6 +3,7 @@ import './styles.css';
 import mermaid from 'mermaid';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 // URLs de Auth y Generate definidas en .env
 const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'https://<tu-auth-endpoint>.amazonaws.com/dev';
@@ -520,9 +521,7 @@ export default function App() {
     if (!token || token.trim() === '') {
       setError('No hay token de autenticación. Inicia sesión nuevamente.');
       return;
-    }
-
-    setIsLoading(true);
+    }    setIsLoading(true);
     try {
       const svgElement = svgRef.current.querySelector('svg');
       if (!svgElement) {
@@ -538,13 +537,61 @@ export default function App() {
         const svgData = new XMLSerializer().serializeToString(svgElement);
         imageBase64 = btoa(unescape(encodeURIComponent(svgData)));
       } else {
-        const canvas = await html2canvas(svgElement, {
-          backgroundColor: '#0a0a0a',
-          scale: 2
-        });
-        const dataURL = canvas.toDataURL('image/png');
-        imageBase64 = dataURL.split(',')[1];
-        format = 'png';
+        try {
+          // Crear un elemento temporal fuera del TransformWrapper
+          const tempContainer = document.createElement('div');
+          tempContainer.style.position = 'absolute';
+          tempContainer.style.left = '-9999px';
+          tempContainer.style.top = '-9999px';
+          tempContainer.style.background = '#0a0a0a';
+          document.body.appendChild(tempContainer);
+          
+          // Clonar el SVG
+          const clonedSvg = svgElement.cloneNode(true);
+          clonedSvg.style.background = '#0a0a0a';
+          tempContainer.appendChild(clonedSvg);
+          
+          // Usar html2canvas en el elemento temporal
+          const canvas = await html2canvas(tempContainer, {
+            backgroundColor: '#0a0a0a',
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            scrollX: 0,
+            scrollY: 0
+          });
+          
+          // Limpiar
+          document.body.removeChild(tempContainer);
+          
+          const dataURL = canvas.toDataURL('image/png');
+          imageBase64 = dataURL.split(',')[1];
+          format = 'png';
+        } catch (canvasError) {
+          console.error('Error con html2canvas:', canvasError);
+          // Fallback: convertir SVG a PNG usando canvas directamente
+          const svgData = new XMLSerializer().serializeToString(svgElement);
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const img = new Image();
+          
+          await new Promise((resolve, reject) => {
+            img.onload = () => {
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx.fillStyle = '#0a0a0a';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(img, 0, 0);
+              resolve();
+            };
+            img.onerror = reject;
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+          });
+          
+          const dataURL = canvas.toDataURL('image/png');
+          imageBase64 = dataURL.split(',')[1];
+          format = 'png';
+        }
       }
 
       const res = await fetch(`${GENERATE_URL}/generate/save-frontend`, {
@@ -1246,10 +1293,12 @@ Ejemplo:
             )}
           </div>
         </div>        {/* Panel de preview con temática Batman */}
-        {diagram && (
-          <div className="preview-panel">
+        {diagram && (          <div className="preview-panel">
             <div className="preview-header">
               <h3>👁️ VISUALIZACIÓN DEL DIAGRAMA</h3>
+              <div className="zoom-instructions">
+                <small>💡 Usa la rueda del mouse para zoom, arrastra para mover</small>
+              </div>
               <div className="preview-actions">
                 <button 
                   onClick={exportSvgToPDF} 
@@ -1277,9 +1326,38 @@ Ejemplo:
                 </button>
               </div>
             </div>
-            
-            <div className="mermaid-container">
-              <div ref={svgRef} className="mermaid-diagram" />
+              <div className="mermaid-container">
+              <TransformWrapper
+                initialScale={1}
+                minScale={0.1}
+                maxScale={5}
+                wheel={{ step: 0.1 }}
+                pan={{ disabled: false }}
+                doubleClick={{ disabled: false, step: 0.7 }}
+                centerOnInit={true}
+              >
+                {({ zoomIn, zoomOut, resetTransform, centerView }) => (
+                  <>
+                    <div className="diagram-controls">
+                      <button onClick={() => zoomIn()} className="btn-control" title="Acercar">
+                        🔍+
+                      </button>
+                      <button onClick={() => zoomOut()} className="btn-control" title="Alejar">
+                        🔍-
+                      </button>
+                      <button onClick={() => resetTransform()} className="btn-control" title="Restablecer zoom">
+                        🎯
+                      </button>
+                      <button onClick={() => centerView()} className="btn-control" title="Centrar">
+                        📍
+                      </button>
+                    </div>
+                    <TransformComponent>
+                      <div ref={svgRef} className="mermaid-diagram" />
+                    </TransformComponent>
+                  </>
+                )}
+              </TransformWrapper>
             </div>
 
             {diagramUrl && (
