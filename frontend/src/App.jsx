@@ -1198,54 +1198,113 @@ Ejemplo:
     setShowS3Modal(false);
     setS3Data(null);
   }
-
   if (!token) {
     return (
-      <div className={`auth-container theme-${currentTheme}`}>
-        <div className="auth-background">
-          <div className="theme-symbol">{activeTheme.name.split(' ')[0]}</div>
-        </div>        <div className="auth-content">
-          {isRegistering ? 
-            <SignUp 
-              activeTheme={activeTheme}
-              themes={themes}
-              currentTheme={currentTheme}
-              changeTheme={changeTheme}
-              tenantId={tenantId}
-              setTenantId={setTenantId}
-              handleRegister={handleRegister}
-              userId={userId}
-              setUserId={setUserId}
-              password={password}
-              setPassword={setPassword}
-              authError={authError}
-              setIsRegistering={setIsRegistering}
-              handleListS3={handleListS3}
-              isLoadingS3={isLoadingS3}
-            /> : 
-            <SignIn 
-              activeTheme={activeTheme}
-              themes={themes}
-              currentTheme={currentTheme}
-              changeTheme={changeTheme}
-              tenantId={tenantId}
-              setTenantId={setTenantId}
-              handleLogin={handleLogin}
-              userId={userId}
-              setUserId={setUserId}
-              password={password}
-              setPassword={setPassword}
-              authError={authError}
-              setIsRegistering={setIsRegistering}
-              handleListS3={handleListS3}
-              isLoadingS3={isLoadingS3}
-            />
-          }
-          {registerMessage && (
-            <div className="success-message">✅ {registerMessage}</div>
-          )}
+      <>
+        <div className={`auth-container theme-${currentTheme}`}>
+          <div className="auth-background">
+            <div className="theme-symbol">{activeTheme.name.split(' ')[0]}</div>
+          </div>        <div className="auth-content">
+            {isRegistering ? 
+              <SignUp 
+                activeTheme={activeTheme}
+                themes={themes}
+                currentTheme={currentTheme}
+                changeTheme={changeTheme}
+                tenantId={tenantId}
+                setTenantId={setTenantId}
+                handleRegister={handleRegister}
+                userId={userId}
+                setUserId={setUserId}
+                password={password}
+                setPassword={setPassword}
+                authError={authError}
+                setIsRegistering={setIsRegistering}
+                handleListS3={handleListS3}
+                isLoadingS3={isLoadingS3}
+              /> : 
+              <SignIn 
+                activeTheme={activeTheme}
+                themes={themes}
+                currentTheme={currentTheme}
+                changeTheme={changeTheme}
+                tenantId={tenantId}
+                setTenantId={setTenantId}
+                handleLogin={handleLogin}
+                userId={userId}
+                setUserId={setUserId}
+                password={password}
+                setPassword={setPassword}
+                authError={authError}
+                setIsRegistering={setIsRegistering}
+                handleListS3={handleListS3}
+                isLoadingS3={isLoadingS3}
+              />
+            }
+            {registerMessage && (
+              <div className="success-message">✅ {registerMessage}</div>
+            )}
+          </div>
         </div>
-      </div>
+        
+        {/* Modal para listar S3 - disponible en auth también */}
+        {showS3Modal && (
+          <div className="modal-overlay" onClick={closeS3Modal}>
+            <div className="modal-content s3-modal" onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>📂 Archivos en la Bat-Cueva (S3)</h3>
+                <button className="modal-close" onClick={closeS3Modal}>✕</button>
+              </div>
+              <div className="modal-body">
+                {isLoadingS3 ? (
+                  <div className="loading-message">⏳ Cargando archivos...</div>
+                ) : s3Data ? (
+                  <div className="s3-content">
+                    <div className="s3-info">
+                      <strong>Bucket:</strong> {s3Data.bucket}<br/>
+                      <strong>Total Tenants:</strong> {s3Data.total_tenants}
+                    </div>
+                    <div className="s3-tree">
+                      {s3Data.directories.map((tenant, idx) => (
+                        <div key={idx} className="tenant-item">
+                          <div className="tenant-header">🏢 <strong>{tenant.name}</strong></div>
+                          {tenant.users && tenant.users.length > 0 ? (
+                            <div className="users-list">
+                              {tenant.users.map((user, userIdx) => (
+                                <div key={userIdx} className="user-item">
+                                  <div className="user-header">👤 {user.name}</div>
+                                  {user.diagrams && user.diagrams.length > 0 ? (
+                                    <div className="diagrams-list">
+                                      {user.diagrams.map((diagram, diagIdx) => (
+                                        <div key={diagIdx} className="diagram-item">
+                                          📊 {diagram}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="no-diagrams">📭 Sin diagramas</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="no-users">👤 Sin usuarios</div>
+                          )}
+                          {tenant.error && (
+                            <div className="error-info">❌ Error: {tenant.error}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="error-message">❌ No se pudieron cargar los datos</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
   return (
@@ -1565,8 +1624,7 @@ Ejemplo:
               ))}
             </ul>
           )}
-        </div>
-      )}
+        </div>      )}
 
       {/* Modal para visualizar historial */}
       {showHistoryModal && (
@@ -1578,64 +1636,6 @@ Ejemplo:
             </div>
             <div className="modal-body">
               <img src={modalImgUrl} alt="Historial Diagrama" className="history-img" />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para listar S3 */}
-      {showS3Modal && (
-        <div className="modal-overlay" onClick={closeS3Modal}>
-          <div className="modal-content s3-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>📂 Archivos en la Bat-Cueva (S3)</h3>
-              <button className="modal-close" onClick={closeS3Modal}>✕</button>
-            </div>
-            <div className="modal-body">
-              {isLoadingS3 ? (
-                <div className="loading-message">⏳ Cargando archivos...</div>
-              ) : s3Data ? (
-                <div className="s3-content">
-                  <div className="s3-info">
-                    <strong>Bucket:</strong> {s3Data.bucket}<br/>
-                    <strong>Total Tenants:</strong> {s3Data.total_tenants}
-                  </div>
-                  <div className="s3-tree">
-                    {s3Data.directories.map((tenant, idx) => (
-                      <div key={idx} className="tenant-item">
-                        <div className="tenant-header">🏢 <strong>{tenant.name}</strong></div>
-                        {tenant.users && tenant.users.length > 0 ? (
-                          <div className="users-list">
-                            {tenant.users.map((user, userIdx) => (
-                              <div key={userIdx} className="user-item">
-                                <div className="user-header">👤 {user.name}</div>
-                                {user.diagrams && user.diagrams.length > 0 ? (
-                                  <div className="diagrams-list">
-                                    {user.diagrams.map((diagram, diagIdx) => (
-                                      <div key={diagIdx} className="diagram-item">
-                                        📊 {diagram}
-                                      </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div className="no-diagrams">📭 Sin diagramas</div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="no-users">👤 Sin usuarios</div>
-                        )}
-                        {tenant.error && (
-                          <div className="error-info">❌ Error: {tenant.error}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="error-message">❌ No se pudieron cargar los datos</div>
-              )}
             </div>
           </div>
         </div>
