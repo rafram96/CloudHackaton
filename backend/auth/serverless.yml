@@ -11,7 +11,7 @@ provider:
   timeout: 30
   stage: ${opt:stage, 'dev'}
   iam:
-    role: arn:aws:iam::582232142172:role/LabRole  
+    role: arn:aws:iam::582232142172:role/LabRole
   environment:
     USERS_TABLE: h_users
     TOKENS_TABLE: h_tokens_access
