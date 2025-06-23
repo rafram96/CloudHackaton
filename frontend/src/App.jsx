@@ -15,6 +15,8 @@ const SignIn = ({
   currentTheme, 
   changeTheme, 
   handleLogin, 
+  tenantId,
+  setTenantId,
   userId, 
   setUserId, 
   password, 
@@ -28,6 +30,16 @@ const SignIn = ({
       <p>Identifícate para acceder</p>
     </div>
     <form onSubmit={handleLogin}>
+      <div className="input-group">
+        <label>🏷️ Tenant</label>
+        <input
+          type="text"
+          placeholder="ID del Tenant"
+          value={tenantId}
+          onChange={e => setTenantId(e.target.value)}
+          required
+        />
+      </div>
       <div className="input-group">
         <label>{activeTheme.userIcon} Identificación</label>
         <input
@@ -86,6 +98,8 @@ const SignUp = ({
   currentTheme, 
   changeTheme, 
   handleRegister, 
+  tenantId,
+  setTenantId,
   userId, 
   setUserId, 
   password, 
@@ -99,6 +113,16 @@ const SignUp = ({
       <p>Únete al equipo</p>
     </div>
     <form onSubmit={handleRegister}>
+      <div className="input-group">
+        <label>🏷️ Tenant</label>
+        <input
+          type="text"
+          placeholder="ID del Tenant"
+          value={tenantId}
+          onChange={e => setTenantId(e.target.value)}
+          required
+        />
+      </div>
       <div className="input-group">
         <label>{activeTheme.userIcon} Nombre del Héroe</label>
         <input
@@ -989,6 +1013,8 @@ Ejemplo:
               themes={themes}
               currentTheme={currentTheme}
               changeTheme={changeTheme}
+              tenantId={tenantId}
+              setTenantId={setTenantId}
               handleRegister={handleRegister}
               userId={userId}
               setUserId={setUserId}
@@ -1002,6 +1028,8 @@ Ejemplo:
               themes={themes}
               currentTheme={currentTheme}
               changeTheme={changeTheme}
+              tenantId={tenantId}
+              setTenantId={setTenantId}
               handleLogin={handleLogin}
               userId={userId}
               setUserId={setUserId}

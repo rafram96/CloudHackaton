@@ -15,7 +15,7 @@ package:
 
 provider:
   name: aws
-  runtime: python3.13
+  runtime: python3.11
   memorySize: 1024
   timeout: 29
   stage: ${opt:stage, 'dev'}
@@ -40,7 +40,12 @@ functions:
       - http:
           path: /generate/preview
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Tenant-Id
 
   save-frontend:
     handler: handler_save_frontend.lambda_handler
@@ -52,7 +57,12 @@ functions:
       - http:
           path: /generate/save-frontend
           method: post
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Tenant-Id
 
   history:
     handler: handler_history.lambda_handler
@@ -64,7 +74,12 @@ functions:
       - http:
           path: /generate/history
           method: get
-          cors: true
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Tenant-Id
 
 resources:
   Resources:
