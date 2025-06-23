@@ -90,14 +90,14 @@ const SignIn = ({
         ))}
       </div>
     </div>
-    
-    {/* Botón Lista S3 en auth */}
+      {/* Botón Lista S3 en auth */}
     <div className="auth-s3-section">
       <button 
         type="button"
         className="btn-s3-list auth-s3-btn" 
         onClick={handleListS3}
         disabled={isLoadingS3}
+        title="📂 Ver archivos guardados en S3 - Solo aparecen diagramas cuando presiones 'Guardar' después de generar"
       >
         {isLoadingS3 ? '⏳' : '📁 Ver Archivos S3'}
       </button>
@@ -186,14 +186,14 @@ const SignUp = ({
         ))}
       </div>
     </div>
-    
-    {/* Botón Lista S3 en auth */}
+      {/* Botón Lista S3 en auth */}
     <div className="auth-s3-section">
       <button 
         type="button"
         className="btn-s3-list auth-s3-btn" 
         onClick={handleListS3}
         disabled={isLoadingS3}
+        title="📂 Ver archivos guardados en S3 - Solo aparecen diagramas cuando presiones 'Guardar' después de generar"
       >
         {isLoadingS3 ? '⏳' : '📁 Ver Archivos S3'}
       </button>
@@ -1324,12 +1324,11 @@ Ejemplo:
                 <option key={key} value={key}>{theme.name}</option>
               ))}
             </select>          </div>
-          <span className="user-info">{activeTheme.userIcon} {userId}</span>
-          <button 
+          <span className="user-info">{activeTheme.userIcon} {userId}</span>          <button 
             className="btn-s3-list" 
             onClick={handleListS3}
             disabled={isLoadingS3}
-            title="Listar directorios S3"
+            title="📂 Ver estructura del bucket S3 - Solo se guardan diagramas cuando presiones 'Guardar' después de generar"
           >
             {isLoadingS3 ? '⏳' : '📁 Lista S3'}
           </button>
