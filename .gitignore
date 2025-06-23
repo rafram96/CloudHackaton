@@ -2,3 +2,4 @@ docs/IMPLEMENTATION_SUMMARY.md
 backend/node_modules
 backend/package-lock.json
 backend/package.json
+docs
