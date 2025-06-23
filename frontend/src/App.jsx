@@ -72,8 +72,7 @@ const SignIn = ({
         </button>
       </p>
     </form>
-    
-    {/* Selector de tema en login */}
+      {/* Selector de tema en login */}
     <div className="theme-selector">
       <label>🎨 Elige tu tema:</label>
       <div className="theme-options">
@@ -88,6 +87,18 @@ const SignIn = ({
           </button>
         ))}
       </div>
+    </div>
+    
+    {/* Botón Lista S3 en auth */}
+    <div className="auth-s3-section">
+      <button 
+        type="button"
+        className="btn-s3-list auth-s3-btn" 
+        onClick={handleListS3}
+        disabled={isLoadingS3}
+      >
+        {isLoadingS3 ? '⏳' : '📁 Ver Archivos S3'}
+      </button>
     </div>
   </div>
 );
@@ -154,9 +165,7 @@ const SignUp = ({
           Iniciar sesión
         </button>
       </p>
-    </form>
-
-    {/* Selector de tema en registro también */}
+    </form>    {/* Selector de tema en registro también */}
     <div className="theme-selector">
       <label>🎨 Elige tu tema:</label>
       <div className="theme-options">
@@ -171,6 +180,18 @@ const SignUp = ({
           </button>
         ))}
       </div>
+    </div>
+    
+    {/* Botón Lista S3 en auth */}
+    <div className="auth-s3-section">
+      <button 
+        type="button"
+        className="btn-s3-list auth-s3-btn" 
+        onClick={handleListS3}
+        disabled={isLoadingS3}
+      >
+        {isLoadingS3 ? '⏳' : '📁 Ver Archivos S3'}
+      </button>
     </div>
   </div>
 );
@@ -208,10 +229,14 @@ export default function App() {
   const [currentTheme, setCurrentTheme] = useState(() => {
     return localStorage.getItem('selectedTheme') || 'batman';
   });
-
   // Estado para modal de historial
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [modalImgUrl, setModalImgUrl] = useState('');
+
+  // Estado para modal de lista S3
+  const [showS3Modal, setShowS3Modal] = useState(false);
+  const [s3Data, setS3Data] = useState(null);
+  const [isLoadingS3, setIsLoadingS3] = useState(false);
 
   // Ejemplos predefinidos por tipo de entrada
   const examples = {
@@ -1121,6 +1146,41 @@ Ejemplo:
     setShowHistoryModal(false);
     setModalImgUrl('');
   }
+  // Función para listar S3
+  async function handleListS3() {
+    setIsLoadingS3(true);
+    try {
+      // Intentar primero con el endpoint de generate
+      let res = await fetch(`${GENERATE_URL}/generate/list-s3`, {
+        method: 'GET'
+      });
+      
+      // Si falla, intentar con el endpoint de auth
+      if (!res.ok) {
+        res = await fetch(`${AUTH_URL}/auth/list-s3`, {
+          method: 'GET'
+        });
+      }
+      
+      if (res.ok) {
+        const data = await res.json();
+        setS3Data(data);
+        setShowS3Modal(true);
+      } else {
+        setError('Error al cargar lista S3');
+      }
+    } catch (err) {
+      console.error('Error listando S3:', err);
+      setError(`Error de conexión: ${err.message}`);
+    } finally {
+      setIsLoadingS3(false);
+    }
+  }
+
+  function closeS3Modal() {
+    setShowS3Modal(false);
+    setS3Data(null);
+  }
 
   if (!token) {
     return (
@@ -1184,9 +1244,16 @@ Ejemplo:
               {Object.entries(themes).map(([key, theme]) => (
                 <option key={key} value={key}>{theme.name}</option>
               ))}
-            </select>
-          </div>
+            </select>          </div>
           <span className="user-info">{activeTheme.userIcon} {userId}</span>
+          <button 
+            className="btn-s3-list" 
+            onClick={handleListS3}
+            disabled={isLoadingS3}
+            title="Listar directorios S3"
+          >
+            {isLoadingS3 ? '⏳' : '📁 Lista S3'}
+          </button>
           <button className="btn-logout" onClick={handleLogout}>
             {activeTheme.logoutText}
           </button>
@@ -1491,6 +1558,64 @@ Ejemplo:
             </div>
             <div className="modal-body">
               <img src={modalImgUrl} alt="Historial Diagrama" className="history-img" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para listar S3 */}
+      {showS3Modal && (
+        <div className="modal-overlay" onClick={closeS3Modal}>
+          <div className="modal-content s3-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📂 Archivos en la Bat-Cueva (S3)</h3>
+              <button className="modal-close" onClick={closeS3Modal}>✕</button>
+            </div>
+            <div className="modal-body">
+              {isLoadingS3 ? (
+                <div className="loading-message">⏳ Cargando archivos...</div>
+              ) : s3Data ? (
+                <div className="s3-content">
+                  <div className="s3-info">
+                    <strong>Bucket:</strong> {s3Data.bucket}<br/>
+                    <strong>Total Tenants:</strong> {s3Data.total_tenants}
+                  </div>
+                  <div className="s3-tree">
+                    {s3Data.directories.map((tenant, idx) => (
+                      <div key={idx} className="tenant-item">
+                        <div className="tenant-header">🏢 <strong>{tenant.name}</strong></div>
+                        {tenant.users && tenant.users.length > 0 ? (
+                          <div className="users-list">
+                            {tenant.users.map((user, userIdx) => (
+                              <div key={userIdx} className="user-item">
+                                <div className="user-header">👤 {user.name}</div>
+                                {user.diagrams && user.diagrams.length > 0 ? (
+                                  <div className="diagrams-list">
+                                    {user.diagrams.map((diagram, diagIdx) => (
+                                      <div key={diagIdx} className="diagram-item">
+                                        📊 {diagram}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="no-diagrams">📭 Sin diagramas</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="no-users">👤 Sin usuarios</div>
+                        )}
+                        {tenant.error && (
+                          <div className="error-info">❌ Error: {tenant.error}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="error-message">❌ No se pudieron cargar los datos</div>
+              )}
             </div>
           </div>
         </div>

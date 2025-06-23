@@ -1170,3 +1170,123 @@ label[for="file-input"]:hover {
   position: relative;
   box-sizing: border-box;
 }
+
+/* Botón Lista S3 */
+.btn-s3-list {
+  background: #666;
+  color: white;
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background 0.3s ease;
+}
+
+.btn-s3-list:hover {
+  background: #777;
+}
+
+.btn-s3-list:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal S3 */
+.s3-modal {
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.s3-content {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.s3-info {
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+}
+
+.s3-tree {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.tenant-item {
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fafafa;
+}
+
+.tenant-header {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.users-list {
+  margin-left: 20px;
+}
+
+.user-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.user-header {
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.diagrams-list {
+  margin-left: 15px;
+}
+
+.diagram-item {
+  padding: 3px 0;
+  color: #666;
+}
+
+.no-diagrams, .no-users {
+  color: #999;
+  font-style: italic;
+  margin-left: 15px;
+}
+
+.error-info {
+  color: red;
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+/* Botón S3 en pantalla de auth */
+.auth-s3-section {
+  margin-top: 15px;
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.auth-s3-btn {
+  background: var(--secondary-color) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  padding: 10px 15px !important;
+  font-size: 14px !important;
+  width: 100%;
+}
+
+.auth-s3-btn:hover {
+  background: var(--accent-color) !important;
+}

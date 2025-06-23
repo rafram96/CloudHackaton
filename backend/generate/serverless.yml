@@ -98,6 +98,20 @@ functions:
               - Authorization
               - X-Tenant-Id
 
+  list-s3:
+    handler: handler_list_s3.lambda_handler
+    package:
+      patterns:
+        - handler_list_s3.py
+    events:
+      - http:
+          path: /generate/list-s3
+          method: get
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+
 resources:
   Resources:
     # Tabla de Digramas

@@ -11,10 +11,10 @@ provider:
   timeout: 30
   stage: ${opt:stage, 'dev'}
   iam:
-    role: arn:aws:iam::582232142172:role/LabRole
-  environment:
+    role: arn:aws:iam::582232142172:role/LabRole  environment:
     USERS_TABLE: h_users
     TOKENS_TABLE: h_tokens_access
+    BUCKET: diagramas-hackacloud-${self:provider.stage}
 
 functions:
   register:
@@ -38,7 +38,6 @@ functions:
           path: /auth/login
           method: post
           cors: true
-
   validateToken:
     handler: Lambda_ValidarTokenAcceso.lambda_handler
     package:
@@ -48,6 +47,17 @@ functions:
       - http:
           path: /auth/validate
           method: post
+          cors: true
+
+  list-s3:
+    handler: handler_list_s3.lambda_handler
+    package:
+      include:
+        - handler_list_s3.py
+    events:
+      - http:
+          path: /auth/list-s3
+          method: get
           cors: true
 
 resources:
