@@ -23,7 +23,9 @@ const SignIn = ({
   password, 
   setPassword, 
   authError, 
-  setIsRegistering 
+  setIsRegistering,
+  handleListS3,
+  isLoadingS3
 }) => (
   <div className="auth-form">
     <div className="auth-header">
@@ -72,7 +74,7 @@ const SignIn = ({
         </button>
       </p>
     </form>
-      {/* Selector de tema en login */}
+    {/* Selector de tema en login */}
     <div className="theme-selector">
       <label>🎨 Elige tu tema:</label>
       <div className="theme-options">
@@ -117,7 +119,9 @@ const SignUp = ({
   password, 
   setPassword, 
   authError, 
-  setIsRegistering 
+  setIsRegistering,
+  handleListS3,
+  isLoadingS3
 }) => (
   <div className="auth-form">
     <div className="auth-header">
@@ -165,7 +169,8 @@ const SignUp = ({
           Iniciar sesión
         </button>
       </p>
-    </form>    {/* Selector de tema en registro también */}
+    </form>
+    {/* Selector de tema en registro también */}
     <div className="theme-selector">
       <label>🎨 Elige tu tema:</label>
       <div className="theme-options">
@@ -203,11 +208,10 @@ export default function App() {
   );
   // Estado de historial de diagramas procesados
   const [history, setHistory] = useState([]);
-
   // Estado de autenticación
-  const [userId, setUserId] = useState('');
+  const [userId, setUserId] = useState(localStorage.getItem('userId') || '');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [isRegistering, setIsRegistering] = useState(false);
   const [registerMessage, setRegisterMessage] = useState('');
   const [authError, setAuthError] = useState('');
@@ -438,10 +442,12 @@ export default function App() {
           user_id: userId,
           password
         })
-      });
-      const data = await res.json();
+      });      const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Login failed');
       setToken(data.token);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', userId);
+      localStorage.setItem('tenantId', tenantId);
       // cargar historial tras login
       fetchHistory(data.token);
     } catch (err) {
@@ -648,7 +654,6 @@ export default function App() {
       setIsLoading(false);
     }
   }
-
   function handleLogout() {
     setToken('');
     setUserId('');
@@ -663,6 +668,10 @@ export default function App() {
     setGraphType('flowchart');
     setSaveFormat('svg');
     setIsLoading(false);
+    // Limpiar localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('tenantId');
   }
 
   function loadExample() {
@@ -927,11 +936,19 @@ Ejemplo:
       setError(`Error exportando SVG: ${err.message}`);
     }
   }
-
   // Función para toggle del modo oscuro
   function toggleDarkMode() {
     setIsDarkMode(!isDarkMode);
-  }  // Integrar mermaid with mejor manejo de errores
+  }
+
+  // Cargar historial automáticamente si hay token válido
+  useEffect(() => {
+    if (token) {
+      fetchHistory(token);
+    }
+  }, [token]);
+
+  // Integrar mermaid with mejor manejo de errores
   useEffect(() => {
     if (diagram && svgRef.current) {
       console.log('Iniciando renderización de Mermaid...');
@@ -1187,8 +1204,7 @@ Ejemplo:
       <div className={`auth-container theme-${currentTheme}`}>
         <div className="auth-background">
           <div className="theme-symbol">{activeTheme.name.split(' ')[0]}</div>
-        </div>
-        <div className="auth-content">
+        </div>        <div className="auth-content">
           {isRegistering ? 
             <SignUp 
               activeTheme={activeTheme}
@@ -1204,6 +1220,8 @@ Ejemplo:
               setPassword={setPassword}
               authError={authError}
               setIsRegistering={setIsRegistering}
+              handleListS3={handleListS3}
+              isLoadingS3={isLoadingS3}
             /> : 
             <SignIn 
               activeTheme={activeTheme}
@@ -1219,6 +1237,8 @@ Ejemplo:
               setPassword={setPassword}
               authError={authError}
               setIsRegistering={setIsRegistering}
+              handleListS3={handleListS3}
+              isLoadingS3={isLoadingS3}
             />
           }
           {registerMessage && (
