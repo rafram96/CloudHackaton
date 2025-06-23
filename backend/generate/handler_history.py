@@ -33,9 +33,9 @@ def lambda_handler(event, context):
             KeyConditionExpression=Key('tenant_id').eq(tenant_id),
             FilterExpression=Attr('owner_id').eq(user_id)
         )
-        items = resp.get('Items', [])
-        # Ordenar por created_at descendente
+        items = resp.get('Items', [])        # Ordenar por created_at descendente
         sorted_items = sorted(items, key=lambda x: x.get('created_at', ''), reverse=True)
+        
         history = []
         for item in sorted_items:
             url = f"https://{BUCKET}.s3.amazonaws.com/{item.get('image_s3key')}"
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
                 'diagram_id': item.get('diagram_id'),
                 'createdAt': item.get('created_at'),
                 'diagram_type': item.get('diagram_type'),
-                'code': item.get('source_code_s3key') and None,  # omitir código completo o podría extraer del S3
+                'source_code_s3key': item.get('source_code_s3key'),  # Incluir la clave S3 del código
                 's3_url': url
             })
         return {'statusCode': 200, 'headers': HEADERS, 'body': json.dumps(history)}

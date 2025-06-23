@@ -208,6 +208,10 @@ export default function App() {
     return localStorage.getItem('selectedTheme') || 'batman';
   });
 
+  // Estado para modal de historial
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [modalImgUrl, setModalImgUrl] = useState('');
+
   // Ejemplos predefinidos por tipo de entrada
   const examples = {
     json: {
@@ -982,22 +986,79 @@ Ejemplo:
   useEffect(() => {
     localStorage.setItem('tenantId', tenantId);
   }, [tenantId]);
-
   // Función para recuperar historial
   async function fetchHistory(token) {
+    console.log('[fetchHistory] token:', token, 'tenantId:', tenantId);
     try {
       const res = await fetch(`${GENERATE_URL}/generate/history`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token || data?.token || ''}`,
+          'Authorization': `Bearer ${token || ''}`,
           'X-Tenant-Id': tenantId
         }
       });
       if (res.ok) {
         const arr = await res.json();
-        setHistory(arr);
+        console.log('[fetchHistory] data:', arr);
+        // Validar que arr es un array
+        if (Array.isArray(arr)) {
+          setHistory(arr);
+        } else {
+          console.warn('[fetchHistory] Response is not an array:', arr);
+          setHistory([]);
+        }
+      } else {
+        console.error('[fetchHistory] HTTP error:', res.status, res.statusText);
+        const errorData = await res.json().catch(() => ({ error: 'Error desconocido' }));
+        setError(`Error cargando historial: ${errorData.error || res.statusText}`);
       }
-    } catch {}    
+    } catch (err) {
+      console.error('[fetchHistory] error:', err);
+      setError(`Error de conexión al cargar historial: ${err.message}`);
+    }
+  }  // Cargar código desde S3
+  async function handleLoadFromHistory(item) {
+    if (!item.source_code_s3key) {
+      setError('❌ No hay código fuente guardado para este diagrama');
+      console.warn('No hay código guardado para este item:', item);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      // Construir URL del código fuente
+      const bucketUrl = `https://diagramas-hackacloud-dev.s3.amazonaws.com/${item.source_code_s3key}`;
+      console.log('Cargando código desde:', bucketUrl);
+      
+      const res = await fetch(bucketUrl);
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const text = await res.text();
+      setCode(text);
+      setSuccessMessage('✅ Código cargado desde el historial');
+      console.log('Código cargado desde historial:', text.substring(0, 100) + '...');
+      
+      // Limpiar mensaje después de 3 segundos
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error('Error cargando código de historial:', err);
+      setError(`❌ No se pudo cargar el código: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Ver imagen en modal
+  function handleViewHistory(item) {
+    setModalImgUrl(item.s3_url);
+    setShowHistoryModal(true);
+  }
+
+  function closeHistoryModal() {
+    setShowHistoryModal(false);
+    setModalImgUrl('');
   }
 
   if (!token) {
@@ -1261,18 +1322,85 @@ Ejemplo:
       {/* Panel de historial de diagramas procesados */}
       {token && (
         <div className="history-panel">
+          <p className="history-note">⚠️ Solo se guardarán en el historial los diagramas sobre los que presiones "Guardar".</p>
           <h3>📜 Historial de diagramas</h3>
-          <ul>
-            {history.map(item => (
-              <li key={item.diagram_id}>
-                <strong>{new Date(item.createdAt).toLocaleString()}</strong> – {item.diagram_type}
-                <button onClick={() => setCode(item.code)}>🔄 Cargar</button>
-                <button onClick={() => {
-                  setDiagramUrl(item.s3_url);
-                }}>👁️ Ver</button>
-              </li>
-            ))}
-          </ul>
+          <button onClick={() => fetchHistory(token)} className="btn-secondary">
+            🔄 Actualizar Historial
+          </button>
+          
+          {history.length === 0 ? (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '2rem', 
+              color: 'var(--text-color)', 
+              opacity: '0.7' 
+            }}>
+              📭 No hay diagramas guardados aún.<br/>
+              <small>Genera y guarda tu primer diagrama para verlo aquí.</small>
+            </div>
+          ) : (
+            <ul>
+              {history.map(item => (
+                <li key={item.diagram_id}>
+                  <div className="history-item-info">
+                    <strong>
+                      {item.createdAt ? 
+                        new Date(item.createdAt).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : 
+                        'Fecha no disponible'
+                    }</strong>
+                    <span> – {item.diagram_type || 'Tipo no disponible'}</span>
+                    {!item.source_code_s3key && (
+                      <div style={{ 
+                        fontSize: '0.75rem', 
+                        color: 'orange', 
+                        marginTop: '0.25rem' 
+                      }}>
+                        ⚠️ Sin código fuente
+                      </div>
+                    )}
+                  </div>
+                  <div className="history-item-actions">
+                    <button 
+                      onClick={() => handleLoadFromHistory(item)} 
+                      className="btn-secondary"
+                      disabled={!item.source_code_s3key || isLoading}
+                      title={!item.source_code_s3key ? 'No hay código fuente disponible' : 'Cargar código en el editor'}
+                    >
+                      🔄 Cargar
+                    </button>
+                    <button 
+                      onClick={() => handleViewHistory(item)} 
+                      className="btn-primary"
+                      title="Ver imagen del diagrama"
+                    >
+                      👁️ Ver
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* Modal para visualizar historial */}
+      {showHistoryModal && (
+        <div className="modal-overlay" onClick={closeHistoryModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>👁️ Vista de Historial</h3>
+              <button className="modal-close" onClick={closeHistoryModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <img src={modalImgUrl} alt="Historial Diagrama" className="history-img" />
+            </div>
+          </div>
         </div>
       )}
     </div>
