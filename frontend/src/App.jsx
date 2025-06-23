@@ -1042,10 +1042,16 @@ Ejemplo:
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
       }
-      
-      const data = await res.json();
+        const data = await res.json();
       setCode(data.code);
-      setSuccessMessage('✅ Código cargado desde el historial');
+      
+      // Cambiar el tipo de diagrama si está disponible
+      if (item.diagram_type) {
+        setGraphType(item.diagram_type);
+        console.log('Tipo de diagrama cambiado a:', item.diagram_type);
+      }
+      
+      setSuccessMessage('✅ Código y tipo de diagrama cargados desde el historial');
       console.log('Código cargado desde historial:', data.code.substring(0, 100) + '...');
       
       // Limpiar mensaje después de 3 segundos
