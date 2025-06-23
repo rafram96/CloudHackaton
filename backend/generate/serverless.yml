@@ -81,6 +81,23 @@ functions:
               - Authorization
               - X-Tenant-Id
 
+  load-code:
+    handler: handler_load_code.lambda_handler
+    package:
+      patterns:
+        - handler_load_code.py
+        - auth_utils.py
+    events:
+      - http:
+          path: /generate/load-code
+          method: post
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Tenant-Id
+
 resources:
   Resources:
     # Tabla de Digramas

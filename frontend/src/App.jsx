@@ -1026,19 +1026,27 @@ Ejemplo:
     
     setIsLoading(true);
     try {
-      // Construir URL del código fuente
-      const bucketUrl = `https://diagramas-hackacloud-dev.s3.amazonaws.com/${item.source_code_s3key}`;
-      console.log('Cargando código desde:', bucketUrl);
+      // Usar el endpoint del backend en lugar de acceso directo a S3
+      const res = await fetch(`${GENERATE_URL}/generate/load-code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'X-Tenant-Id': tenantId
+        },
+        body: JSON.stringify({
+          s3_key: item.source_code_s3key
+        })
+      });
       
-      const res = await fetch(bucketUrl);
       if (!res.ok) {
         throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
       }
       
-      const text = await res.text();
-      setCode(text);
+      const data = await res.json();
+      setCode(data.code);
       setSuccessMessage('✅ Código cargado desde el historial');
-      console.log('Código cargado desde historial:', text.substring(0, 100) + '...');
+      console.log('Código cargado desde historial:', data.code.substring(0, 100) + '...');
       
       // Limpiar mensaje después de 3 segundos
       setTimeout(() => setSuccessMessage(''), 3000);

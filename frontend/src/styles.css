@@ -299,8 +299,16 @@ body {
 /* ===== APLICACIÓN PRINCIPAL ===== */
 .app-container {
   min-height: 100vh;
-  background: var(--gradient-bg);
+  background: var(--background-color);
+  background-image: var(--gradient-bg);
   color: var(--text-color);
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.app-container * {
+  box-sizing: border-box;
 }
 
 /* ===== HEADER PRINCIPAL ===== */
@@ -738,12 +746,14 @@ body {
 
 /* Historial de Diagramas */
 .history-panel {
-  background-color: var(--accent-color);
-  border: 2px solid var(--border-color);
+  background-color: var(--accent-color) !important;
+  border: 2px solid var(--border-color) !important;
   border-radius: 8px;
   padding: 1.5rem;
   margin: 1rem 0;
   color: var(--text-color);
+  overflow: hidden;
+  position: relative;
 }
 
 .history-panel h3 {
@@ -801,25 +811,9 @@ body {
 
 .history-panel ul {
   list-style: none;
-  padding: 0;
-  margin: 1rem 0 0 0;
-}
-
-.history-panel li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--border-color);
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-  padding: 1rem;
-}
-
-.history-panel li:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
+  padding: 0;  margin: 1rem 0 0 0;
+  background: transparent !important;
+  border: none !important;
 }
 
 .history-item-info {
@@ -984,4 +978,61 @@ label[for="file-input"] {
 label[for="file-input"]:hover {
   background: var(--primary-color);
   color: #000;
+}
+
+/* Corregir problema del rectángulo blanco debajo del historial */
+.history-panel::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+.history-panel ul::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
+/* Asegurar que no hay espacios en blanco extraños */
+.history-panel * {
+  box-sizing: border-box;
+}
+
+/* Eliminar cualquier margen/padding que cause problemas */
+.history-panel ul {
+  background: transparent !important;
+  margin: 1rem 0 0 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  list-style: none !important;
+}
+
+.history-panel li {
+  background: rgba(255, 255, 255, 0.02) !important;
+  margin-bottom: 0.5rem !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 1rem !important;
+  border-radius: 4px !important;
+}
+
+.history-panel li:last-child {
+  border-bottom: none !important;
+  margin-bottom: 0 !important;
+}
+
+/* Asegurar que el contenedor del historial no tenga overflow visible */
+.history-panel {
+  background-color: var(--accent-color) !important;
+  border: 2px solid var(--border-color) !important;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  color: var(--text-color);
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
 }
